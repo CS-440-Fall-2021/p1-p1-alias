@@ -1,0 +1,144 @@
+class Patch{
+    constructor (xMin, xMax, zMin, zMax, resolution){
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.zMin = zMin;
+        this.zMax = zMax;
+        this.resolution = resolution;
+        this.gradV = this.getGradientVectors(this.resolution)
+    }
+
+    getTriangleVertices(){
+        let vertices = this.getVertices();
+        let triangleVertices = [];
+        for (let i=0; i<this.resolution; i++){
+            for (let j=i*(this.resolution+1); j<(i+1)*(this.resolution+1) ; j++){
+                if (j == i*(this.resolution+1)){
+                    triangleVertices.push(vertices[j])
+                    triangleVertices.push(vertices[j+1])
+                    triangleVertices.push(vertices[j + this.resolution+1])
+                }    
+                else if (j == (i+1)*(this.resolution+1)-1){
+                    triangleVertices.push(vertices[j])
+                    triangleVertices.push(vertices[j + this.resolution])
+                    triangleVertices.push(vertices[j + this.resolution+1])
+                }
+                else{
+                    triangleVertices.push(vertices[j])
+                    triangleVertices.push(vertices[j + this.resolution])
+                    triangleVertices.push(vertices[j + this.resolution+1])
+                    triangleVertices.push(vertices[j])
+                    triangleVertices.push(vertices[j+1])
+                    triangleVertices.push(vertices[j + this.resolution+1]) 
+                }
+            }
+        }
+        return triangleVertices;
+    }
+
+    getVertices() {
+        let x_list = [];
+        let z_list = [];
+        for (let i=0; i<this.resolution+1; i++){
+            x_list[i] = i * (this.xMax-this.xMin)/this.resolution + this.xMin;
+        }
+        for (let i=0; i<this.resolution+1; i++){
+            z_list[i] = i * (this.zMax-this.zMin)/this.resolution + this.zMin;
+        }
+        // getting cartesian product of arrays 
+        // ref: https://stackoverflow.com/a/43053803
+        const cartesian =
+                (...a) => a.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+        
+        return cartesian(x_list, z_list);
+    }
+
+    getPerlinNoise(x,z){
+        let offsetVectors = this.getOffsetVectors(x,z);
+        let [xMin_i, xMax_i, zMin_i, zMax_i] = this.getGridCellIndex(x,z);
+        let cellGradV = vec4();
+        // cellGradV = [bottomLeft, bottomRight, topRight, topLeft]
+        cellGradV[0] = this.gradV[xMin_i][zMin_i];
+        cellGradV[1] = this.gradV[xMax_i][zMin_i];
+        cellGradV[2] = this.gradV[xMax_i][zMax_i];
+        cellGradV[3] = this.gradV[xMin_i][zMax_i];
+
+        let dots = vec4();
+        for (let i=0; i<cellGradV.length;i++){
+            dots[i] = dot(cellGradV[i], offsetVectors[i]);
+        }
+        let wx = x - (xMin_i * (this.xMax-this.xMin)/this.resolution + this.xMin);
+        let wz = z - (zMin_i * (this.zMax-this.zMin)/this.resolution + this.zMin);
+
+        let dx0 = this.interpolate(dots[0], dots[1], wx);
+        let dx1 = this.interpolate(dots[3], dots[2], wx);
+        let y = this.interpolate(dx0, dx1, wz);
+
+        return y
+    }
+    
+    getGradientVectors(resolution){
+        let patchOut = new Array(resolution+1);
+        
+        for (let i=0; i<resolution+1; i++){
+            patchOut[i] = new Array(resolution+1);
+            for (let j=0; j<resolution+1; j++){
+                let [a, b] = [Math.random() *2 -1, Math.random()*2 -1];
+                let mag = Math.sqrt(a**2 + b**2);
+                patchOut[i][j] = vec2(a/mag, b/mag); 
+            }
+        }
+        return patchOut;
+    }
+
+    getGridCell(x,z){
+        let [cellXMin, cellXMax, cellZMin, cellZMax] = this.getGridCellIndex(x,z); 
+        cellXMin *= (this.xMax-this.xMin)/this.resolution + this.xMin;
+        cellXMax *= (this.xMax-this.xMin)/this.resolution + this.xMin;
+        cellZMin *= (this.zMax-this.zMin)/this.resolution + this.zMin;
+        cellZMax *= (this.zMax-this.zMin)/this.resolution + this.zMin;
+        return [cellXMin, cellXMax, cellZMin, cellZMax];
+    }
+    
+    getGridCellIndex(x,z){
+        let cellXMin = Math.floor((x-this.xMin) / ((this.xMax-this.xMin)/this.resolution), 1);
+        let cellXMax = Math.ceil((x-this.xMin) / ((this.xMax-this.xMin)/this.resolution), 1);
+        let cellZMin = Math.floor((z-this.zMin) / ((this.zMax-this.zMin)/this.resolution), 1);
+        let cellZMax = Math.ceil((z-this.zMin) / ((this.zMax-this.zMin)/this.resolution), 1);
+        return [cellXMin, cellXMax, cellZMin, cellZMax];
+    }
+
+    getOffsetVectors(x,z) {
+        let [cellXMin, cellXMax, cellZMin, cellZMax] = this.getGridCell(x,z);
+        // offsetVectors = [bottomLeft, bottomRight, topRight, topLeft]
+        let offsetVectors = vec4();
+        offsetVectors[0] = vec2(cellXMin - x, cellZMin - z);
+        offsetVectors[0] = mult(1/Math.sqrt(offsetVectors[0][0]**2 + offsetVectors[0][1]**2), offsetVectors[0]);
+
+        offsetVectors[1] = vec2(cellXMax - x, cellZMin - z);
+        offsetVectors[1] = mult(1/Math.sqrt(offsetVectors[1][0]**2 + offsetVectors[1][1]**2), offsetVectors[1]);
+        
+        offsetVectors[2] = vec2(cellXMax - x, cellZMax - z);
+        offsetVectors[2] = mult(1/Math.sqrt(offsetVectors[2][0]**2 + offsetVectors[2][1]**2), offsetVectors[2]);
+        
+        offsetVectors[3] = vec2(cellXMin - x, cellZMax - z);
+        offsetVectors[3] = mult(1/Math.sqrt(offsetVectors[3][0]**2 + offsetVectors[3][1]**2), offsetVectors[3]);
+
+        return offsetVectors;
+    }
+
+    // Smootherstep interpolation function 
+    // ref: https://en.wikipedia.org/wiki/Smoothstep#Variations
+    interpolate(a0, a1, w) {
+        // Clamping to the limits:
+        if (0.0 > w) return a0;
+        if (1.0 < w) return a1;
+        
+        // Using Smootherstep for an even smoother result with a second derivative equal to zero on boundaries
+        return (a1 - a0) * ((w * (w * 6.0 - 15.0) + 10.0) * w * w * w) + a0;
+    }
+
+}
+
+p = new Patch(1, 2, 2, 4, 20);
+p.getTriangleVertices();

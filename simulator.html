@@ -1,0 +1,45 @@
+<!-- taken from book -->
+<!DOCTYPE html>
+<html>
+  <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <title>simulator.html</title>
+      
+        <script id="vertex-shader" type="x-shader/x-vertex">
+        
+            attribute vec4 vPosition;
+
+            void
+            main()
+            {
+                gl_Position = vPosition;
+                gl_PointSize=10.0;
+            }
+        </script>
+    
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            
+            precision mediump float;
+            
+            varying vec4 fColor;
+            void
+            main()
+            {
+                gl_FragColor = vec4(0.0, 1.0, 0.0, 0.5);
+            }
+        </script>
+        
+        <script type="text/javascript" src="initShadersES6.js"></script>
+        <script type="text/javascript" src="MVES6.js"></script>
+        <script type="text/javascript" src="perlin_noise.js"></script>
+        <script type="text/javascript" src="simulation.js"></script>
+
+    </head>
+
+    <body>
+        <canvas id="gl-canvas" width="512" height="512" style="width: 100%; height: 100%;">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </body>
+
+</html>
