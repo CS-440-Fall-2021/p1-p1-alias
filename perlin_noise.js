@@ -5,7 +5,6 @@ class Patch{
         this.zMin = zMin;
         this.zMax = zMax;
         this.resolution = resolution;
-        // this.gradV = this.getGradientVectors(this.resolution)
     }
 
     getTriangleVertices(){
