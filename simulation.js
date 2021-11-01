@@ -57,38 +57,47 @@ window.onload = function init() {
         switch (key) {
             case '1':
                 left+=0.1;
-                
+                console.log('input taken');
+                render(vertices.length);
                 break;
             case '2':
                 left-=0.1;
+                render(vertices.length);
                 break;
             case '3':
                 up+=0.1;
+                render(vertices.length);
                 break;
             case '4':
                 up-=0.1;
+                render(vertices.length);
                 break;
             case '5':
                 near+=0.1;
+                render(vertices.length);
                 break;
             case '6':
                 near-=0.1;
+                render(vertices.length);
                 break;
         }
     };
+   
+    render(vertices.length);
+    
+
+
+
+
+function render(len) {
+    
+    gl.clear(gl.COLOR_BUFFER_BIT);
     var eye=vec3(left,up,near);
     let lookat = lookAt(eye, at, lookup);
     let perspect = perspective(60, 1, -2, 5);
     let mat = mult(lookat, perspect);
     let perp = gl.getUniformLocation(program, "perp");
     gl.uniformMatrix4fv(perp, false, flatten(mat));
-
-    
-
-    render(vertices.length);
-}
-
-function render(len) {
-    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.LINES, 0, len);
+}
 }
