@@ -14,7 +14,7 @@
             void
             main()
             {
-                gl_Position =  vPosition * perp;
+                gl_Position = perp * vec4(vPosition.x,vPosition.y,vPosition.z,1);
                 Pos = vPosition;
                 gl_PointSize= 1.0;
             }
@@ -28,7 +28,14 @@
             void
             main()
             {
-                gl_FragColor = vec4(Pos[1]+0.5,Pos[1]+0.5,Pos[1]+0.5,1);
+                if (Pos[1] <= 0.0){
+                    gl_FragColor = vec4(0,0,1,1);
+                }
+                
+                if (Pos[1] > 0.0 && Pos[1] < 0.5){
+                    gl_FragColor = vec4(0,1,0,1);
+                }
+                //0.588,0.294,0.0.
             }
         </script>
         

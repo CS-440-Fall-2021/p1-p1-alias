@@ -5,7 +5,7 @@ let resolution = 200;
 let perlin_density = 20;
 let near = 0.0;
 let left = 0.0;
-let up = 3.0;
+let up = 0.0;
 let fovy = 60.0;  // Field-of-view in Y direction angle (in degrees)
 let aspect;       // Viewport aspect ratio
 
@@ -16,8 +16,10 @@ function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
     let vertices = patch.getTriangleVertices();
     for (let i = 0; i < vertices.length; i++) {
-        vertices[i] = vec3(vertices[i][0], patch.getPerlinNoise(vertices[i][0], vertices[i][1], perlin_density)-1, vertices[i][1]);
+        vertices[i] = vec3(vertices[i][0], patch.getPerlinNoise(vertices[i][0], vertices[i][1], perlin_density), vertices[i][1]);
+
     }
+    console.log(vertices);
     return vertices;
 }
 
@@ -85,11 +87,12 @@ window.onload = function init() {
     function render(len) {
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        let eye=vec3(left,up,near);
-        let at = vec3(0, -1, -5);
-        let lookup = vec3(0, 5, -1);
+        let eye = vec3(left, up, near);
+        console.log(eye);
+        let at = vec3(left, 0, -5);
+        let lookup = vec3(0, 5, 0);
         let lookat = lookAt(eye, at, lookup);
-        // let perspect = perspective(60, 1, near-2, near-10);
+        let perspect = perspective(60 , 1, near+0.1, 200);
         let mat = mult(lookat, perspect);
         let perp = gl.getUniformLocation(program, "perp");
         gl.uniformMatrix4fv(perp, false, flatten(mat));

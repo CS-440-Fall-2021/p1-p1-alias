@@ -13,22 +13,22 @@ class Patch{
         for (let i=0; i<this.resolution; i++){
             for (let j=i*(this.resolution+1); j<(i+1)*(this.resolution+1) ; j++){
                 if (j == i*(this.resolution+1)){
-                    triangleVertices.push(vertices[j])
-                    triangleVertices.push(vertices[j+1])
-                    triangleVertices.push(vertices[j + this.resolution+1])
+                    triangleVertices.push(vertices[j]);
+                    triangleVertices.push(vertices[j+1]);
+                    triangleVertices.push(vertices[j + this.resolution+1]);
                 }    
                 else if (j == (i+1)*(this.resolution+1)-1){
-                    triangleVertices.push(vertices[j])
-                    triangleVertices.push(vertices[j + this.resolution])
-                    triangleVertices.push(vertices[j + this.resolution+1])
+                    triangleVertices.push(vertices[j]);
+                    triangleVertices.push(vertices[j + this.resolution]);
+                    triangleVertices.push(vertices[j + this.resolution+1]);
                 }
                 else{
-                    triangleVertices.push(vertices[j])
-                    triangleVertices.push(vertices[j + this.resolution])
-                    triangleVertices.push(vertices[j + this.resolution+1])
-                    triangleVertices.push(vertices[j])
-                    triangleVertices.push(vertices[j+1])
-                    triangleVertices.push(vertices[j + this.resolution+1]) 
+                    triangleVertices.push(vertices[j]);
+                    triangleVertices.push(vertices[j + this.resolution]);
+                    triangleVertices.push(vertices[j + this.resolution+1]);
+                    triangleVertices.push(vertices[j]);
+                    triangleVertices.push(vertices[j+1]);
+                    triangleVertices.push(vertices[j + this.resolution+1]) ;
                 }
             }
         }
@@ -77,7 +77,7 @@ class Patch{
         let dx1 = this.interpolate(dots[3], dots[2], wx);
         let y = this.interpolate(dx0, dx1, wz);
 
-        return y
+        return y;
     }
     
     getGradientVectors(resolution){
