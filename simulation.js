@@ -5,7 +5,7 @@ let resolution = 200;
 let perlin_density = 20;
 let near = 0.0;
 let left = 0.0;
-let up = 0.0;
+let up = 1.0;
 let fovy = 60.0;  // Field-of-view in Y direction angle (in degrees)
 let aspect;       // Viewport aspect ratio
 
@@ -89,11 +89,12 @@ window.onload = function init() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         let eye = vec3(left, up, near);
         console.log(eye);
-        let at = vec3(left, 0, -5);
-        let lookup = vec3(0, 5, 0);
-        let lookat = lookAt(eye, at, lookup);
-        let perspect = perspective(60 , 1, near+0.1, 200);
-        let mat = mult(lookat, perspect);
+        let at_vec = vec3(0,-1.5,-5)
+        let at = add(eye,at_vec);
+        let look_up = vec3(0, 5, 0)
+        let modelView = lookAt(eye, at, look_up);
+        let perspect = perspective(60 , 1, near, -20);
+        let mat = mult(modelView, perspect);
         let perp = gl.getUniformLocation(program, "perp");
         gl.uniformMatrix4fv(perp, false, flatten(mat));
         gl.drawArrays(gl.LINES, 0, len);

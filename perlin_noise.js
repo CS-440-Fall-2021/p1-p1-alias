@@ -76,6 +76,11 @@ class Patch{
         let dx0 = this.interpolate(dots[0], dots[1], wx);
         let dx1 = this.interpolate(dots[3], dots[2], wx);
         let y = this.interpolate(dx0, dx1, wz);
+        
+        // Don't show valley below sea level
+        if (y < 0){
+            y = 0;
+        }
 
         return y;
     }
