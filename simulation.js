@@ -12,6 +12,8 @@ let aspect;       // Viewport aspect ratio
 let mvMatrix, pMatrix;
 let modelView, projection;
 
+let viewMode = 1;
+
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
     let vertices = patch.getTriangleVertices();
@@ -31,7 +33,7 @@ window.onload = function init() {
 
     //  Configure WebGL
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     //  Load shaders and initialize attribute buffers
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
@@ -79,6 +81,15 @@ window.onload = function init() {
                 near+=0.1;
                 render(vertices.length);
                 break;
+            case 'V':
+                if(viewMode==2){
+                    viewMode = 0
+                }
+                else{
+                    viewMode++
+                }
+                render(vertices.length);
+                break;
         }
     };
    
@@ -89,7 +100,7 @@ window.onload = function init() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         let eye = vec3(left, up, near);
         console.log(eye);
-        let at_vec = vec3(0,-1.5,-5)
+        let at_vec = vec3(0, 1.5,-5)
         let at = add(eye,at_vec);
         let look_up = vec3(0, 5, 0)
         let modelView = lookAt(eye, at, look_up);
@@ -97,6 +108,15 @@ window.onload = function init() {
         let mat = mult(modelView, perspect);
         let perp = gl.getUniformLocation(program, "perp");
         gl.uniformMatrix4fv(perp, false, flatten(mat));
-        gl.drawArrays(gl.LINES, 0, len);
+        if (viewMode == 0){
+            gl.drawArrays(gl.POINTS, 0, len);
+        }
+        else if(viewMode == 1){
+            gl.drawArrays(gl.LINES, 0, len);
+        }
+        else{
+            gl.drawArrays(gl.TRIANGLES, 0, len);
+        }
+        
     }
 }
