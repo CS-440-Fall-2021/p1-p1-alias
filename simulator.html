@@ -15,11 +15,12 @@
             #define grass_color vec4(0.168, 0.709, 0.302,1)
             #define mountain_color vec4(0.59, 0.48, 0.33,1)
             #define snow_color vec4(1, 1, 1, 1)
+            uniform mat4 modelV;
 
             void
             main()
             {
-                gl_Position = perp * vec4(vPosition.x,vPosition.y,vPosition.z,1);
+                gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
                 Pos = vPosition;
                 gl_PointSize= 1.0;
 
