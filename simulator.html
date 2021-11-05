@@ -13,7 +13,7 @@
             varying vec4 color;
 
             #define grass_color vec4(0.168, 0.709, 0.302,1)
-            #define mountain_color vec4(0.168, 0.709, 0.302,1)
+            #define mountain_color vec4(0.59, 0.48, 0.33,1)
             #define snow_color vec4(1, 1, 1, 1)
 
             void
@@ -39,6 +39,7 @@
                         color = grass_color;
                     }
                     else {
+                        //color = vec4(1.0,0.0,0.0,1.0);
                         color = mountain_color;
                     }
                 }
