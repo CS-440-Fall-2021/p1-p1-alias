@@ -18,6 +18,7 @@ let aspect; // Viewport aspect ratio
 
 let mvMatrix, pMatrix;
 let modelView, projection;
+let normals = [];
 
 let viewMode = 1;
 
@@ -31,6 +32,7 @@ function get_patch(xMin, xMax, zMin, zMax) {
       y,
       vertices[i][1]
     );
+    normals.push(normal);
   }
   return vertices;
 }
@@ -62,6 +64,15 @@ window.onload = function init() {
   let vPosition = gl.getAttribLocation(program, "vPosition");
   gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vPosition);
+
+  // Load the data into the GPU and bind to shader variables.
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW);
+
+  // Associate out shader variables with our data buffer
+  let normal = gl.getAttribLocation(program, "normalInterp");
+  gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(normal);
 
   window.onkeydown = function (event) {
     var key = String.fromCharCode(event.keyCode);
@@ -163,7 +174,7 @@ window.onload = function init() {
     gl.uniformMatrix4fv(modView, false, flatten(modelView));
     gl.uniformMatrix4fv(perp, false, flatten(perspect));
     if (viewMode == 0){
-      gl.drawArrays(gl.POINTS, 0, len);
+        gl.drawArrays(gl.POINTS, 0, len);
     }
     else if(viewMode == 1){
         gl.drawArrays(gl.LINES, 0, len);
