@@ -25,13 +25,13 @@ function get_patch(xMin, xMax, zMin, zMax) {
   patch = new Patch(xMin, xMax, zMin, zMax, resolution);
   let vertices = patch.getTriangleVertices();
   for (let i = 0; i < vertices.length; i++) {
+    let [y, normal] = patch.getPerlinNoise(vertices[i][0], vertices[i][1], perlin_density);
     vertices[i] = vec3(
       vertices[i][0],
-      patch.getPerlinNoise(vertices[i][0], vertices[i][1], perlin_density),
+      y,
       vertices[i][1]
     );
   }
-  console.log(vertices);
   return vertices;
 }
 

@@ -77,12 +77,31 @@ class Patch{
         let dx1 = this.interpolate(dots[3], dots[2], wx);
         let y = this.interpolate(dx0, dx1, wz);
         
+        let dx_n0 = this.normal_interpolate(dots[0], dots[1], wx);
+        let dx_n1 = this.normal_interpolate(dots[3], dots[2], wx);
+        let n_y = this.normal_interpolate(dx_n0, dx_n1, wz);
+        
+        let dy_dx = (dots[2]-dots[3]-dots[1]+dots[0]) * 
+                ((wz * (wz * 6.0 - 15.0) + 10.0) * wz * wz * wz) *
+                ((wx * (wx * 30.0 - 60.0) + 30.0) * wx * wx) + 
+                (dots[1]-dots[0]) * ((wx * (wx * 30.0 - 60.0) + 30.0) * wx * wx) 
+
+        let dy_dz = (dots[2]-dots[3]-dots[1]+dots[0]) * 
+                ((wx * (wx * 6.0 - 15.0) + 10.0) * wx * wx * wx) *
+                ((wz * (wz * 30.0 - 60.0) + 30.0) * wz * wz) + 
+                (dots[3]-dots[0]) * ((wz * (wz * 30.0 - 60.0) + 30.0) * wz * wz)        
+
+        let tx = vec3(1, dy_dx, 0);
+        let tz = vec3(0, dy_dz, 1);
+
+        let ty = cross(tz, tx);
+
         // Don't show valley below sea level
         if (y < 0){
             y = 0;
         }
-
-        return y;
+        
+        return [y, normalize(ty)];
     }
     
     getGradientVectors(resolution){
@@ -155,5 +174,18 @@ class Patch{
         return (a1 - a0) * ((w * (w * 6.0 - 15.0) + 10.0) * w * w * w) + a0;
     }
 
+    normal_interpolate(a0, a1, w) {
+        // Clamping to the limits:
+        if (0.0 > w) return a0;
+        if (1.0 < w) return a1;
+        
+        // return (a1 - a0) * w + a0;
+
+        // Using this cubic interpolation (Smoothstep) for a smooth appearance:
+        // return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
+
+        // Using Smootherstep for an even smoother result with a second derivative equal to zero on boundaries
+        return (a1 - a0) * -1/(((w * (w * 30.0 - 60.0) + 30.0) * w * w)) + a0;
+    }
 }
 
