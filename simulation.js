@@ -6,7 +6,8 @@ let perlin_density = 25;
 let x = 0.0;
 let y = 3.0;
 let z = 0.0;
-let t_val = 0;
+let pitch_val = 0;
+let yaw_val = 0;
 let left = 0;
 let right = 0;
 let top1 = 0;
@@ -97,8 +98,19 @@ window.onload = function init() {
         render(vertices.length);
         break;
       case "W":
-        if (event.shiftKey) t_val-=0.1;
-        else t_val+=0.1;
+        pitch_val+=0.1;
+        render(vertices.length);
+        break;
+      case "S":
+        pitch_val-=0.1;
+        render(vertices.length);
+        break;
+      case "A":
+        yaw_val-=0.1;
+        render(vertices.length);
+        break;
+      case "D":
+        yaw_val+=0.1;
         render(vertices.length);
         break;
       case 'V':
@@ -144,8 +156,8 @@ window.onload = function init() {
 
   function render(len) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    let eye = vec3(x, y, z-t_val);
-    let at_vec = vec3(0, -1, -1);
+    let eye = vec3(x, y, z);
+    let at_vec = vec3(0+yaw_val, -1+pitch_val, -1);
     let at = add(eye, at_vec);
     let look_up = vec3(0, 5, 0);
     let modelView = lookAt(eye, at, look_up);
