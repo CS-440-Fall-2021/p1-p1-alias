@@ -147,7 +147,7 @@ window.onload = function init() {
           program = initShaders(gl, "vertex-shader-flat", "fragment-shader-flat");
         }
         else {
-          program = initShaders(gl, "vertex-shader-phong", "fragment-shader");
+          program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
         }
         colorMode++;
         console.log("colorMode",colorMode);
