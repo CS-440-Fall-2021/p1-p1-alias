@@ -24,8 +24,8 @@ class Patch{
                 }
                 else{
                     triangleVertices.push(vertices[j]);
-                    triangleVertices.push(vertices[j + this.resolution]);
                     triangleVertices.push(vertices[j + this.resolution+1]);
+                    triangleVertices.push(vertices[j + this.resolution]);
                     triangleVertices.push(vertices[j]);
                     triangleVertices.push(vertices[j+1]);
                     triangleVertices.push(vertices[j + this.resolution+1]) ;
@@ -99,8 +99,8 @@ class Patch{
         // Don't show valley below sea level
         if (y < 0){
             y = 0;
+            ty = vec3(0, 1, 0);
         }
-        
         return [y, normalize(ty)];
     }
     

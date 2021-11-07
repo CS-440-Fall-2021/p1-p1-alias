@@ -18,6 +18,11 @@ let near = 0;
 let far = 0;
 let fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
 let aspect; // Viewport aspect ratio
+let xMin = -10.0;
+let xMax = 10.0;
+let zMin = -10.0;
+let zMax = 10.0;
+
 
 let mvMatrix, pMatrix;
 let modelView, projection;
@@ -58,7 +63,7 @@ window.onload = function init() {
   gl.useProgram(program);
 
   // vertices of the corners of the canvas
-  let vertices = get_patch(-10, 10, -10, 10);
+  let vertices = get_patch(xMin, xMax, zMin, zMax);
 
   // Load the data into the GPU and bind to shader variables.
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
@@ -82,33 +87,33 @@ window.onload = function init() {
     var key = String.fromCharCode(event.keyCode);
     switch (key) {
       case "1":
-        if (event.shiftKey) left += 0.1;
-        else left -= 0.1;
+        if (event.shiftKey) left = (left+0.1 < 1) ? left + 0.1 : left;
+        else left = (left-0.1 > -1) ? left - 0.1 : left;
         render(vertices.length);
         break;
       case "2":
-        if (event.shiftKey) right -= 0.1;
-        else right += 0.1;
+        if (event.shiftKey) right = (right+0.1 < 1) ? right + 0.1 : right;
+        else right = (right-0.1 > -1) ? right - 0.1 : right;
         render(vertices.length);
         break;
       case "3":
-        if (event.shiftKey) top1 -= 0.1;
-        else top1 += 0.1;
+        if (event.shiftKey) top1 = (top1+0.1 < 1) ? top1 + 0.1 : top1;
+        else top1 = (top1-0.1 > -1) ? top1 - 0.1 : top1;
         render(vertices.length);
         break;
       case "4":
-        if (event.shiftKey) bottom += 0.1;
-        else bottom -= 0.1;
+        if (event.shiftKey) bottom = (bottom+0.1 < 1) ? bottom + 0.1 : bottom;
+        else bottom = (bottom-0.1 > -1) ? bottom - 0.1 : bottom;
         render(vertices.length);
         break;
       case "5":
-        if (event.shiftKey) near -= 0.1;
-        else near += 0.1;
+        if (event.shiftKey) near = (near+0.1 < 1) ? near + 0.1 : near;
+        else near = (near-0.1 > -1) ? near - 0.1 : near;
         render(vertices.length);
         break;
       case "6":
-        if (event.shiftKey) far += 0.1;
-        else far -= 0.1;
+        if (event.shiftKey) far = (far+0.1 < 1) ? far + 0.1 : far;
+        else far = (far-0.1 > -1) ? far - 0.1 : far;
         render(vertices.length);
         break;
       case "W":
@@ -145,7 +150,6 @@ window.onload = function init() {
           program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
           colorMode++;
         }
-        console.log("here");
         gl.enable(gl.DEPTH_TEST);
         // gl.enable(gl.CULL_FACE);
         gl.useProgram(program);
@@ -189,24 +193,26 @@ window.onload = function init() {
 
   function render(len) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     let eye = vec3(x, y, z);
     let at_vec = vec3(0+yaw_val, -1+pitch_val, -1);
     let at = add(eye, at_vec);
     let look_up = vec3(0, 5, 0);
+
     let modelView = lookAt(eye, at, look_up);
+    let perspect = frustum(left-1, right+1, bottom-1, top1+1, near+1, far-1);
+
     console.log("eye: ", eye);
     console.log("left, right: ", left, right);
     console.log("bottom, top: ", bottom, top1);
     console.log("near, far: ", near, far);
     console.log(modelView);
-    // aspect = (2 + left + right) / (2 + top1 + bottom);
-    // let perspect = perspective(60, aspect, y, -20);
-    let perspect = frustum(left-1, right+1, bottom-1, top1+1, near+1, far-1);
     
     let modView = gl.getUniformLocation(program, "modelV");
     let perp = gl.getUniformLocation(program, "perp");
     gl.uniformMatrix4fv(modView, false, flatten(modelView));
     gl.uniformMatrix4fv(perp, false, flatten(perspect));
+
     if (viewMode == 0){
         gl.drawArrays(gl.POINTS, 0, len);
     }
@@ -217,4 +223,9 @@ window.onload = function init() {
         gl.drawArrays(gl.TRIANGLES, 0, len);
     }
   }
+
+  function setVertices(eye, at_vec) {
+  
+  }
 };
+
