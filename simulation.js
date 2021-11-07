@@ -138,18 +138,19 @@ window.onload = function init() {
         render(vertices.length);
         break;
       case 'C':
-        if(colorMode==2) {
-          colorMode = 0;
-          program = initShaders(gl, "vertex-shader", "fragment-shader");
-        }
-        else if (colorMode==1) {
-          program = initShaders(gl, "vertex-shader", "fragment-shader");
-          colorMode++;
+        if(colorMode==3) colorMode =0;
+        if (colorMode==0) {
+            program = initShaders(gl, "vertex-shader", "fragment-shader"); // gourad shading
+            
+          }
+        else if(colorMode==1) {
+          program = initShaders(gl, "vertex-shader-flat", "fragment-shader-flat");
         }
         else {
           program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
-          colorMode++;
         }
+        colorMode++;
+        console.log("colorMode",colorMode);
         gl.enable(gl.DEPTH_TEST);
         // gl.enable(gl.CULL_FACE);
         gl.useProgram(program);
@@ -201,6 +202,7 @@ window.onload = function init() {
 
     let modelView = lookAt(eye, at, look_up);
     let perspect = frustum(left-1, right+1, bottom-1, top1+1, near+1, far-1);
+    let normalMat = normalMatrix(modelView);
 
     console.log("eye: ", eye);
     console.log("left, right: ", left, right);
@@ -210,8 +212,10 @@ window.onload = function init() {
     
     let modView = gl.getUniformLocation(program, "modelV");
     let perp = gl.getUniformLocation(program, "perp");
+    let normMat = gl.getUniformLocation(program, "normalMat");
     gl.uniformMatrix4fv(modView, false, flatten(modelView));
     gl.uniformMatrix4fv(perp, false, flatten(perspect));
+    gl.uniformMatrix4fv(normMat, false, flatten(normalMat));
 
     if (viewMode == 0){
         gl.drawArrays(gl.POINTS, 0, len);
