@@ -4,18 +4,54 @@
   <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>simulator.html</title>
-      
-        <script id="vertex-shader" type="x-shader/x-vertex">
+
+        <script id="vertex-shader-flat-old" type="x-shader/x-vertex">
             #version 300 es
             in vec4 vPosition;
-            out vec4 Pos;
             uniform mat4 perp;
             uniform mat4 modelV;
-            out vec4 color;
+            flat out vec4 color;
+            
+            // Color values
+            #define grass_color vec4(0.168, 0.709, 0.302,1)
+            #define mountain_color vec4(0.59, 0.48, 0.33,1)
+            #define snow_color vec4(1.0, 1.0, 1.0,1)
+            #define sea_color vec4(0.0,0.412,0.58,1)
+
+            void
+            main()
+            {
+                gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
+                gl_PointSize= 1.0;
+
+                // Assign Color based on y-position
+                if (vPosition[1] <= 0.0){
+                    color = sea_color;
+                }
+                else
+                {
+                    if (vPosition[1] > 0.7){
+                        color = snow_color;
+                    }
+                    else if (vPosition[1] < 0.3){
+                        color = grass_color;
+                    }
+                    else {
+                        color = mountain_color;
+                    }
+                }
+            }
+
+        </script>
+
+        <script id="vertex-shader-flat" type="x-shader/x-vertex">
+            #version 300 es
+            in vec4 vPosition;
+            uniform mat4 perp;
+            uniform mat4 modelV;
+            flat out vec4 color;
             
             in vec3 normalInterp; // Normal Required for Groud and Phong shading
-
-            int shading_mode = 1;   // Shading mode
 
             // For Groud Shading
             float Ka = 0.2;   // Ambient reflection coefficient
@@ -39,7 +75,6 @@
             main()
             {
                 gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
-                Pos = vPosition;
                 gl_PointSize= 1.0;
 
                 // Assign Color based on y-position
@@ -62,30 +97,99 @@
                     }
                 }
 
-                if (shading_mode == 0){
-                    color = vec4(diffuseColor,1);
+                
+                vec3 vertPos = vec3(vPosition.x,vPosition.y,vPosition.z);
+                vec3 N = normalize(normalInterp);
+                vec3 L = normalize(lightPos - vertPos);
+                // Lambert's cosine law
+                float lambertian = max(dot(N, L), 0.0);
+                float specular = 0.0;
+                if(lambertian > 0.0) {
+                    vec3 R = reflect(-L, N);      // Reflected light vector
+                    vec3 V = normalize(-vertPos); // Vector to viewer
+                    // Compute the specular term
+                    float specAngle = max(dot(R, V), 0.0);
+                    specular = pow(specAngle, shininessVal);
                 }
-                else if(shading_mode == 1){
-                    vec3 vertPos = vec3(vPosition.x,vPosition.y,vPosition.z);
-                    vec3 N = normalize(normalInterp);
-                    vec3 L = normalize(lightPos - vertPos);
-                    // Lambert's cosine law
-                    float lambertian = max(dot(N, L), 0.0);
-                    float specular = 0.0;
-                    if(lambertian > 0.0) {
-                        vec3 R = reflect(-L, N);      // Reflected light vector
-                        vec3 V = normalize(-vertPos); // Vector to viewer
-                        // Compute the specular term
-                        float specAngle = max(dot(R, V), 0.0);
-                        specular = pow(specAngle, shininessVal);
+                color = vec4(Ka * ambientColor +
+                            Kd * lambertian * diffuseColor +
+                            Ks * specular * specularColor, 1.0);
+                            }
+
+        </script>
+
+      
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            #version 300 es
+            in vec4 vPosition;
+            uniform mat4 perp;
+            uniform mat4 modelV;
+            out vec4 color;
+            
+            in vec3 normalInterp; // Normal Required for Groud and Phong shading
+
+            // For Groud Shading
+            float Ka = 0.2;   // Ambient reflection coefficient
+            float Kd = 0.8;   // Diffuse reflection coefficient
+            float Ks = 0.2;   // Specular reflection coefficient
+            float shininessVal = 80.0; // Shininess
+            
+            // Color values
+            #define grass_color vec3(0.168, 0.709, 0.302)
+            #define mountain_color vec3(0.59, 0.48, 0.33)
+            #define snow_color vec3(1.0, 1.0, 1.0)
+            #define sea_color vec3(0.0,0.412,0.58)
+
+            // Material color
+            vec3 ambientColor = grass_color;
+            vec3 diffuseColor;
+            vec3 specularColor = vec3(1,1,1);
+            vec3 lightPos = vec3(-5,5,0); // Light position
+
+            void
+            main()
+            {
+                gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
+                gl_PointSize= 1.0;
+
+                // Assign Color based on y-position
+                if (vPosition[1] <= 0.0){
+                    diffuseColor = sea_color;
+                }
+                else
+                {
+                    if (vPosition[1] > 0.7){
+                        diffuseColor = snow_color;
                     }
-                    color = vec4(Ka * ambientColor +
-                                Kd * lambertian * diffuseColor +
-                                Ks * specular * specularColor, 1.0);
-                                }
+                    else if (vPosition[1] < 0.3){
+                        diffuseColor = grass_color;
+                    }
+                    else if (vPosition[1] == 0.0){
+                        diffuseColor = sea_color;
+                    }
+                    else {
+                        diffuseColor = mountain_color;
+                    }
                 }
 
                 
+                vec3 vertPos = vec3(vPosition.x,vPosition.y,vPosition.z);
+                vec3 N = normalize(normalInterp);
+                vec3 L = normalize(lightPos - vertPos);
+                // Lambert's cosine law
+                float lambertian = max(dot(N, L), 0.0);
+                float specular = 0.0;
+                if(lambertian > 0.0) {
+                    vec3 R = reflect(-L, N);      // Reflected light vector
+                    vec3 V = normalize(-vertPos); // Vector to viewer
+                    // Compute the specular term
+                    float specAngle = max(dot(R, V), 0.0);
+                    specular = pow(specAngle, shininessVal);
+                }
+                color = vec4(Ka * ambientColor +
+                            Kd * lambertian * diffuseColor +
+                            Ks * specular * specularColor, 1.0);
+                            }
 
         </script>
 
@@ -93,15 +197,17 @@
             #version 300 es
             precision highp float;
 
+            in vec3 normalInterp; // Normal Required for Groud and Phong shading
             in vec4 vPosition;
             uniform mat4 perp;
             uniform mat4 modelV;
-            out vec4 Pos;
-            out vec4 color;
+            out vec3 Pos;
+            out vec3 Norm;
 
             void main(){
                 gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
-                color = vec4(0.4, 0.4, 0.4 , 1.0);
+                Pos = vec3(gl_Position.x,gl_Position.y,gl_Position.z);
+                Norm = normalInterp;
             }
         </script>
     
@@ -109,8 +215,20 @@
             #version 300 es
             precision mediump float;
             
-            in vec4 Pos;
             in vec4 color;
+            out vec4 fragColor;
+            void
+            main()
+            {
+                fragColor = color;
+            }
+        </script>
+
+        <script id="fragment-shader-flat" type="x-shader/x-fragment">
+            #version 300 es
+            precision mediump float;
+            
+            flat in vec4 color;
             out vec4 fragColor;
             void
             main()
@@ -122,15 +240,69 @@
         <script id="fragment-shader-phong" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
-            
-            in vec4 Pos;
-            in vec4 color;
+
+            in vec3 Norm;  // Surface normal
+            in vec3 Pos;   // Vertex position
             out vec4 fragColor;
-            void
-            main()
-            {
-                fragColor = color;
+
+            // For Phong Shading
+            float Ka = 0.2;   // Ambient reflection coefficient
+            float Kd = 0.8;   // Diffuse reflection coefficient
+            float Ks = 0.2;   // Specular reflection coefficient
+            float shininessVal = 80.0; // Shininess
+            
+            // Color values
+            #define grass_color vec3(0.168, 0.709, 0.302)
+            #define mountain_color vec3(0.59, 0.48, 0.33)
+            #define snow_color vec3(1.0, 1.0, 1.0)
+            #define sea_color vec3(0.0,0.412,0.58)
+
+            // Material color
+            vec3 ambientColor = grass_color;
+            vec3 diffuseColor;
+            vec3 specularColor = vec3(1,1,1);
+            vec3 lightPos = vec3(-5,5,0); // Light position
+
+            void main() {
+
+                // Assign Color based on y-position
+                if (Pos[1] <= 0.0){
+                    diffuseColor = sea_color;
+                }
+                else
+                {
+                    if (Pos[1] > 0.7){
+                        diffuseColor = snow_color;
+                    }
+                    else if (Pos[1] < 0.3){
+                        diffuseColor = grass_color;
+                    }
+                    else if (Pos[1] == 0.0){
+                        diffuseColor = sea_color;
+                    }
+                    else {
+                        diffuseColor = mountain_color;
+                    }
+                }
+
+                vec3 N = normalize(Norm);
+                vec3 L = normalize(lightPos - Pos);
+
+                // Lambert's cosine law
+                float lambertian = max(dot(N, L), 0.0);
+                float specular = 0.0;
+                if(lambertian > 0.0) {
+                    vec3 R = reflect(-L, N);      // Reflected light vector
+                    vec3 V = normalize(-Pos); // Vector to viewer
+                    // Compute the specular term
+                    float specAngle = max(dot(R, V), 0.0);
+                    specular = pow(specAngle, shininessVal);
+                }
+                fragColor = vec4(Ka * ambientColor +
+                                    Kd * lambertian * diffuseColor +
+                                    Ks * specular * specularColor, 1.0);
             }
+
         </script>
         
         <script type="text/javascript" src="initShadersES6.js"></script>

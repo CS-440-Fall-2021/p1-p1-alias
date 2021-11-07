@@ -133,19 +133,19 @@ window.onload = function init() {
         render(vertices.length);
         break;
       case 'C':
-        if(colorMode==2) {
-          colorMode = 0;
-          program = initShaders(gl, "vertex-shader", "fragment-shader");
-        }
-        else if (colorMode==1) {
-          program = initShaders(gl, "vertex-shader", "fragment-shader");
-          colorMode++;
+        if(colorMode==3) colorMode =0;
+        if (colorMode==0) {
+            program = initShaders(gl, "vertex-shader", "fragment-shader"); // gourad shading
+            
+          }
+        else if(colorMode==1) {
+          program = initShaders(gl, "vertex-shader-flat", "fragment-shader-flat");
         }
         else {
           program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
-          colorMode++;
         }
-        console.log("here");
+        colorMode++;
+        console.log("colorMode",colorMode);
         gl.enable(gl.DEPTH_TEST);
         // gl.enable(gl.CULL_FACE);
         gl.useProgram(program);
