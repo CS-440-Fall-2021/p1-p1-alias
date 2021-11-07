@@ -1,5 +1,7 @@
 "use strict";
 
+/** @type {WebGLRenderingContext} */
+
 let gl;
 let resolution = 200;
 let perlin_density = 25;
@@ -22,6 +24,7 @@ let modelView, projection;
 let normals = [];
 
 let viewMode = 1;
+let colorMode = 0;
 
 function get_patch(xMin, xMax, zMin, zMax) {
   patch = new Patch(xMin, xMax, zMin, zMax, resolution);
@@ -127,6 +130,25 @@ window.onload = function init() {
       case 'V':
         if(viewMode==2) viewMode = 0;
         else viewMode++;
+        render(vertices.length);
+        break;
+      case 'C':
+        if(colorMode==2) {
+          colorMode = 0;
+          program = initShaders(gl, "vertex-shader", "fragment-shader");
+        }
+        else if (colorMode==1) {
+          program = initShaders(gl, "vertex-shader", "fragment-shader");
+          colorMode++;
+        }
+        else {
+          program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
+          colorMode++;
+        }
+        console.log("here");
+        gl.enable(gl.DEPTH_TEST);
+        // gl.enable(gl.CULL_FACE);
+        gl.useProgram(program);
         render(vertices.length);
         break;
     }

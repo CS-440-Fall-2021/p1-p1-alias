@@ -88,8 +88,38 @@
                 
 
         </script>
+
+        <script id="vertex-shader-phong" type="x-shader/x-vertex">
+            #version 300 es
+            precision highp float;
+
+            in vec4 vPosition;
+            uniform mat4 perp;
+            uniform mat4 modelV;
+            out vec4 Pos;
+            out vec4 color;
+
+            void main(){
+                gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
+                color = vec4(0.4, 0.4, 0.4 , 1.0);
+            }
+        </script>
     
         <script id="fragment-shader" type="x-shader/x-fragment">
+            #version 300 es
+            precision mediump float;
+            
+            in vec4 Pos;
+            in vec4 color;
+            out vec4 fragColor;
+            void
+            main()
+            {
+                fragColor = color;
+            }
+        </script>
+
+        <script id="fragment-shader-phong" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
             
@@ -111,7 +141,7 @@
     </head>
 
     <body>
-        <canvas id="gl-canvas" width="1500" height="700">
+        <canvas id="gl-canvas" width="512" height="512">
             Oops ... your browser doesn't support the HTML5 canvas element
         </canvas>
     </body>
