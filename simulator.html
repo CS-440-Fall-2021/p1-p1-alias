@@ -6,33 +6,34 @@
         <title>simulator.html</title>
       
         <script id="vertex-shader" type="x-shader/x-vertex">
-        
-            attribute vec4 vPosition;
-            varying vec4 Pos;
+            #version 300 es
+            in vec4 vPosition;
+            out vec4 Pos;
             uniform mat4 perp;
             uniform mat4 modelV;
-            varying vec4 color;
+            out vec4 color;
             
-            varying vec3 normalInterp; // Normal Required for Groud and Phong shading
+            in vec3 normalInterp; // Normal Required for Groud and Phong shading
 
             int shading_mode = 1;   // Shading mode
 
             // For Groud Shading
-            float Ka = 0.9;   // Ambient reflection coefficient
-            float Kd = 0.9;   // Diffuse reflection coefficient
-            float Ks = 0.9;   // Specular reflection coefficient
-            uniform float shininessVal; // Shininess
-            // Material color
-            vec3 ambientColor = vec3(1,1,1);
-            vec3 diffuseColor;
-            vec3 specularColor = vec3(1,1,1);
-            vec3 lightPos = vec3(-5,5,0); // Light position
-
+            float Ka = 0.2;   // Ambient reflection coefficient
+            float Kd = 0.8;   // Diffuse reflection coefficient
+            float Ks = 0.2;   // Specular reflection coefficient
+            float shininessVal = 80.0; // Shininess
+            
             // Color values
             #define grass_color vec3(0.168, 0.709, 0.302)
             #define mountain_color vec3(0.59, 0.48, 0.33)
-            #define snow_color vec3(1, 1, 1)
-            #define sea_color vec3(0,0.412,0.58)
+            #define snow_color vec3(1.0, 1.0, 1.0)
+            #define sea_color vec3(0.0,0.412,0.58)
+
+            // Material color
+            vec3 ambientColor = grass_color;
+            vec3 diffuseColor;
+            vec3 specularColor = vec3(1,1,1);
+            vec3 lightPos = vec3(-5,5,0); // Light position
 
             void
             main()
@@ -50,8 +51,11 @@
                     if (vPosition[1] > 0.7){
                         diffuseColor = snow_color;
                     }
-                    else if (vPosition[1] < 0.2){
+                    else if (vPosition[1] < 0.3){
                         diffuseColor = grass_color;
+                    }
+                    else if (vPosition[1] == 0.0){
+                        diffuseColor = sea_color;
                     }
                     else {
                         diffuseColor = mountain_color;
@@ -86,15 +90,16 @@
         </script>
     
         <script id="fragment-shader" type="x-shader/x-fragment">
-            
+            #version 300 es
             precision mediump float;
             
-            varying vec4 Pos;
-            varying vec4 color;
+            in vec4 Pos;
+            in vec4 color;
+            out vec4 fragColor;
             void
             main()
             {
-                gl_FragColor = color;
+                fragColor = color;
             }
         </script>
         
@@ -106,7 +111,7 @@
     </head>
 
     <body>
-        <canvas id="gl-canvas" width="512" height="512">
+        <canvas id="gl-canvas" width="1500" height="700">
             Oops ... your browser doesn't support the HTML5 canvas element
         </canvas>
     </body>
