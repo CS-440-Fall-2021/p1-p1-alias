@@ -264,7 +264,7 @@
             // For Phong Shading
             float Ka = 0.2;   // Ambient reflection coefficient
             float Kd = 0.8;   // Diffuse reflection coefficient
-            float Ks = 0.2;   // Specular reflection coefficient
+            float Ks = 0.05;   // Specular reflection coefficient
             float shininessVal = 80.0; // Shininess
             
             // Color values
@@ -279,25 +279,28 @@
             vec3 specularColor = vec3(1,1,1);
             vec3 lightPos = vec3(-5,5,0); // Light position
 
+            vec3 interpolate_color(vec3 color1, vec3 color2, float P, float Q, float X){
+                float alpha = (X - P) / (Q - P);
+                vec3 mapped_color = (1.0 - alpha) * color1 + alpha * color2;
+                return mapped_color;
+            }
+
             void main() {
 
                 // Assign Color based on y-position
                 if (vPos[1] <= 0.0){
                     diffuseColor = sea_color;
+                    Ka = 0.2;   // Ambient reflection coefficient
+                    Kd = 0.8;   // Diffuse reflection coefficient
+                    Ks = 0.8;   // Specular reflection coefficient
                 }
                 else
                 {
                     if (vPos[1] > 0.7){
-                        diffuseColor = snow_color;
-                    }
-                    else if (vPos[1] < 0.3){
-                        diffuseColor = grass_color;
-                    }
-                    else if (vPos[1] == 0.0){
-                        diffuseColor = sea_color;
+                        diffuseColor = interpolate_color(mountain_color, snow_color, 0.7, 1.0, vPos[1]);
                     }
                     else {
-                        diffuseColor = mountain_color;
+                        diffuseColor = interpolate_color(grass_color, mountain_color, 0.0, 0.7, vPos[1]);
                     }
                 }
 
