@@ -285,6 +285,12 @@
                 return mapped_color;
             }
 
+            float interpolate_scalar(float A, float B, float P, float Q, float X){
+                float alpha = (X - P) / (Q - P);
+                float interpolated = (1.0 - alpha) * A + alpha * B;
+                return interpolated;
+            }
+
             void main() {
 
                 // Assign Color based on y-position
@@ -296,8 +302,13 @@
                 }
                 else
                 {
-                    if (vPos[1] > 0.7){
+                    if (vPos[1] > 0.9){
+                        diffuseColor = snow_color;
+                        Ks = 0.9;   // Specular reflection coefficient
+                    }
+                    else if (vPos[1] > 0.7){
                         diffuseColor = interpolate_color(mountain_color, snow_color, 0.7, 1.0, vPos[1]);
+                        Ks = interpolate_scalar(0.05,0.9,0.7,0.9,vPos[1]);   // Specular reflection coefficient
                     }
                     else {
                         diffuseColor = interpolate_color(grass_color, mountain_color, 0.0, 0.7, vPos[1]);
