@@ -271,7 +271,7 @@
             #define grass_color vec3(0.168, 0.709, 0.302)
             #define mountain_color vec3(0.59, 0.48, 0.33)
             #define snow_color vec3(1.0, 1.0, 1.0)
-            #define deep_sea_color vec3(0, 0.337, 0.349)
+            #define deep_sea_color vec3(0, 0.321, 0.569)
             #define shallow_sea_color vec3(0.0, 0.576, 0.525)
 
             // Material color
@@ -298,8 +298,8 @@
                 if (vPos[1] <= 0.0){
                     diffuseColor = deep_sea_color;
                     Ka = 0.2;   // Ambient reflection coefficient
-                    Kd = 1.0;   // Diffuse reflection coefficient
-                    Ks = 0.4;   // Specular reflection coefficient
+                    Kd = 0.9;   // Diffuse reflection coefficient
+                    Ks = 0.7;   // Specular reflection coefficient
                 }
                 else
                 {
