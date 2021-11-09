@@ -38,6 +38,9 @@ let normals = [];
 let viewMode = 1;
 let colorMode = 0;
 
+let viewModeHTML;
+let colorModeHTML;
+
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
     vertices = patch.getTriangleVertices();
@@ -56,6 +59,9 @@ function get_patch(xMin, xMax, zMin, zMax) {
 window.onload = function init() {
 
     let canvas = document.getElementById("gl-canvas");
+    viewModeHTML = document.getElementById("view-mode");
+    colorModeHTML = document.getElementById("shade-mode");
+
     gl = canvas.getContext("webgl2");
     if (!gl) alert("WebGL 2.0 isn't available");
 
@@ -202,6 +208,8 @@ window.onload = function init() {
 
     function render() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        viewModeHTML.innerHTML = viewingMode(viewMode);
+        colorModeHTML.innerHTML = coloringMode(colorMode);
         
         let yawMat = rotateY(yaw_val);
         let pitchMat = rotateX(pitch_val);
@@ -251,6 +259,30 @@ window.onload = function init() {
         }
     }
 
+    function viewingMode(viewMode){
+        if (viewMode == 0) {
+            return "Points";
+        }
+        else if (viewMode == 1) {
+            return "Wireframes";
+        }
+        else {
+            return "Faces";
+        }
+    }
+
+    function coloringMode(colorMode){
+        if (colorMode == 0 || colorMode == 1){
+            return "Smooth";
+        }
+        else if (colorMode == 2){
+            return "Flat";
+        }
+        else if (colorMode == 3){
+            return "Phong";
+        }
+    }
+
     function setVertices(eye, at_vec) {
 
         let current, forw, for_left, for_right;
@@ -293,6 +325,7 @@ window.onload = function init() {
                 (Math.trunc(eye[0] / 10) + 1) * 10,
                 (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
                 (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]];
+
             }
             else {
                 forw = get_patch((Math.trunc(eye[0] / 10) - 1) * 10,
