@@ -136,7 +136,6 @@ function vec4()
             out[3] = arguments[0][3];
             return out;
           }
-        }
           else if(arguments[0].type == "vec3") {
             out[0] = arguments[0][0];
             out[1] = arguments[0][1];
@@ -151,6 +150,7 @@ function vec4()
             out[3] = arguments[0][3];
             return out;
           }
+        }
 
 
 
@@ -541,7 +541,8 @@ function rotateX(theta) {
 function rotateY(theta) {
   let c = Math.cos( radians(theta) );
   let s = Math.sin( radians(theta) );
-  let ry = mat4( c, 0.0, s, 0.0,
+  let ry = mat4( 
+      c, 0.0, s, 0.0,
       0.0, 1.0,  0.0, 0.0,
       -s, 0.0,  c, 0.0,
       0.0, 0.0,  0.0, 1.0 );
