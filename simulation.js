@@ -24,6 +24,9 @@ let xMax = 10.0;
 let zMin = -10.0;
 let zMax = 10.0;
 let patches = new Object();
+let time = 0;
+let forward=0;
+let speed = 4;
 
 let mvMatrix, pMatrix;
 let modelView, projection;
@@ -167,6 +170,12 @@ window.onload = function init() {
                 break;
         }
     };
+    let delayInMilliseconds = Math.random() *1000+4000;
+            time= setInterval(function () {
+                    forward+=1;
+
+                
+            }, delayInMilliseconds);
 
     render(vertices.length);
 
@@ -205,7 +214,7 @@ window.onload = function init() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         let eye = vec3(x, y, z);
-        let at_vec = vec3(0 + yaw_val, -1 + pitch_val, -1);
+        let at_vec = vec3(0 + yaw_val, -1 + pitch_val + forward, -1);
         let at = add(eye, at_vec);
         let look_up = vec3(0+ roll_val, 5, 0);
 
