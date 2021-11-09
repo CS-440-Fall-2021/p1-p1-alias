@@ -1,7 +1,7 @@
 "use strict";
 
 /** @type {WebGLRenderingContext} */
-let escape = false;
+let escape = false; //to keep track if esc is pressed
 let gl;
 let resolution = 200;
 let perlin_density = 25;
@@ -115,27 +115,27 @@ window.onload = function init() {
 
                 break;
             case "W":
-                pitch_val = Math.min(90, pitch_val+5);
-                
+                pitch_val = Math.min(90, pitch_val + 5);
+
                 break;
             case "S":
-                pitch_val = Math.max(-90, pitch_val-5);
-                
+                pitch_val = Math.max(-90, pitch_val - 5);
+
                 break;
             case "A":
-                yaw_val = Math.min(90, yaw_val+5);   
+                yaw_val = Math.min(90, yaw_val + 5);
                 break;
 
             case "D":
-                yaw_val = Math.max(-90, yaw_val-5);
+                yaw_val = Math.max(-90, yaw_val - 5);
 
                 break;
             case "Q":
-                roll_val = Math.min(90, roll_val+5);;
+                roll_val = Math.min(90, roll_val + 5);;
 
                 break;
             case "E":
-                roll_val = Math.max(-90, roll_val-5);;
+                roll_val = Math.max(-90, roll_val - 5);;
 
                 break;
             case "&":
@@ -174,7 +174,6 @@ window.onload = function init() {
                 break;
         }
     };
-
     render();
 
     function frustum(left, right, bottom, top, near, far) {
@@ -212,8 +211,8 @@ window.onload = function init() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         viewModeHTML.innerHTML = viewingMode(viewMode);
         colorModeHTML.innerHTML = coloringMode(colorMode);
-        speedHTML.innerHTML=speed;
-        
+        speedHTML.innerHTML = speed;
+
         let yawMat = rotateY(yaw_val);
         let pitchMat = rotateX(pitch_val);
         let rollMat = rotateZ(roll_val);
@@ -221,7 +220,7 @@ window.onload = function init() {
         let at_vec = vec3(0, 0, -1);
         at_vec = mult(pitchMat, mult(yawMat, vec4(at_vec)));
         at_vec = vec3(at_vec[0], at_vec[1], at_vec[2]);
-        
+
         let move = mult(0.01 * speed, at_vec);
         eye = add(eye, move);
 
@@ -234,7 +233,7 @@ window.onload = function init() {
         let perspect = frustum(left - 1, right + 1, bottom - 1, top1 + 1, near + 1, far - 1);
         let normalMat = normalMatrix(modelView, false);
 
-        if ((!cxMax) || (eye[0] > cxMax || eye[0] < cxMin ||  eye[2] > czMax ||  eye[2] < czMin))
+        if ((!cxMax) || (eye[0] > cxMax || eye[0] < cxMin || eye[2] > czMax || eye[2] < czMin))
             setVertices(eye, at_vec);
 
 
@@ -256,13 +255,14 @@ window.onload = function init() {
         }
         if (!escape)
             requestAnimationFrame(render);
-        else{
-            gl.clearColor(0.52, 0.8, 0.92, 1.0);
-            
+        else {
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.clearColor(0, 0, 0, 0.3);
+
         }
     }
 
-    function viewingMode(viewMode){
+    function viewingMode(viewMode) {
         if (viewMode == 0) {
             return "Points";
         }
@@ -274,29 +274,29 @@ window.onload = function init() {
         }
     }
 
-    function coloringMode(colorMode){
-        if (colorMode == 0 || colorMode == 1){
-            function coloringMode(colorMode){
-                if (colorMode == 0 || colorMode == 1){
+    function coloringMode(colorMode) {
+        if (colorMode == 0 || colorMode == 1) {
+            function coloringMode(colorMode) {
+                if (colorMode == 0 || colorMode == 1) {
                     return "Smooth";
                 }
-                else if (colorMode == 2){
+                else if (colorMode == 2) {
                     return "Flat";
                 }
-                else if (colorMode == 3){
+                else if (colorMode == 3) {
                     return "Phong";
                 }
-            }            return "Smooth";
+            } return "Smooth";
         }
-        else if (colorMode == 2){
+        else if (colorMode == 2) {
             return "Flat";
         }
-        else if (colorMode == 3){
+        else if (colorMode == 3) {
             return "Phong";
         }
     }
 
-    
+
 
     function setVertices(eye, at_vec) {
 
@@ -334,7 +334,7 @@ window.onload = function init() {
             (Math.trunc(eye[0] / 10) + 1) * 10,
             (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
             (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20] in patches) {
-                
+
                 // console.log("Found");
                 forw = patches[[(Math.trunc(eye[0] / 10) - 1) * 10,
                 (Math.trunc(eye[0] / 10) + 1) * 10,
@@ -485,7 +485,7 @@ window.onload = function init() {
 
         vertices = vertices.concat(for_right[0]);
         normals = normals.concat(for_right[1]);
-        
+
         // Load the data into the GPU and bind to shader variables.
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);

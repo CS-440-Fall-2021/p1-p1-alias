@@ -1,15 +1,14 @@
 <!-- taken from book -->
 <!DOCTYPE html>
 <html>
-  <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>Flight Simulator</title>
-        <link
-      href="http://fonts.cdnfonts.com/css/rabbid-highway-sign-ii?styles=29640"
-      rel="stylesheet"/>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Flight Simulator</title>
+    <link href="http://fonts.cdnfonts.com/css/rabbid-highway-sign-ii?styles=29640" rel="stylesheet" />
 
 
-        <script id="vertex-shader-flat" type="x-shader/x-vertex">
+    <script id="vertex-shader-flat" type="x-shader/x-vertex">
             #version 300 es
             in vec4 vPosition;
             uniform mat4 perp;
@@ -88,8 +87,8 @@
 
         </script>
 
-      
-        <script id="vertex-shader-gouraud" type="x-shader/x-vertex">
+
+    <script id="vertex-shader-gouraud" type="x-shader/x-vertex">
             #version 300 es
             in vec4 vPosition;
             uniform mat4 perp;
@@ -168,7 +167,7 @@
 
         </script>
 
-        <script id="vertex-shader-phong" type="x-shader/x-vertex">
+    <script id="vertex-shader-phong" type="x-shader/x-vertex">
             #version 300 es
             precision highp float;
 
@@ -190,8 +189,8 @@
                 gl_Position = perp * verPoint4;
             }
         </script>
-    
-        <script id="fragment-shader" type="x-shader/x-fragment">
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
             
@@ -204,7 +203,7 @@
             }
         </script>
 
-        <script id="fragment-shader-flat" type="x-shader/x-fragment">
+    <script id="fragment-shader-flat" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
             
@@ -217,7 +216,7 @@
             }
         </script>
 
-        <script id="fragment-shader-phong" type="x-shader/x-fragment">
+    <script id="fragment-shader-phong" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
 
@@ -306,24 +305,23 @@
             }
 
         </script>
-        
-        <script type="text/javascript" src="initShadersES6.js"></script>
-        <script type="text/javascript" src="MVES6.js"></script>
-        <script type="text/javascript" src="perlin_noise.js"></script>
-        <script type="text/javascript" src="simulation.js"></script>
 
-    </head>
+    <script type="text/javascript" src="initShadersES6.js"></script>
+    <script type="text/javascript" src="MVES6.js"></script>
+    <script type="text/javascript" src="perlin_noise.js"></script>
+    <script type="text/javascript" src="simulation.js"></script>
 
-    <body
-    style="
+</head>
+
+<body style="
       background-color: #242424;
       color: rgb(255, 255, 255);
       font-family: 'Rabbid Highway Sign II', sans-serif;
       margin: 0; 
       overflow: hidden
-    "
-  >
-    <table style="text-align: center;margin-left: auto; margin-right: auto; margin-top: 0%; margin-bottom: 0%; width:80%; height: 80%">
+    ">
+    <table
+        style="text-align: center;margin-left: auto; margin-right: auto; margin-top: 0%; margin-bottom: 0%; width:80%; height: 80%">
         <tr>
             <td style="width:70%">
                 <canvas
@@ -412,7 +410,7 @@
             </td>
         </tr>
     </table>
-    
-  </body>
+
+</body>
 
 </html>
