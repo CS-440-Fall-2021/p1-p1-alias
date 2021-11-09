@@ -23,13 +23,16 @@ let xMin = -10.0;
 let xMax = 10.0;
 let zMin = -10.0;
 let zMax = 10.0;
+let cxMin, cxMax, czMin, czMax;
 let patches = new Object();
 let time = 0;
 let forward = 0;
 let speed = 1;
+let eye = vec3(x, y, z);
 
 let mvMatrix, pMatrix;
 let modelView, projection;
+let vertices = [];
 let normals = [];
 
 let viewMode = 1;
@@ -37,7 +40,7 @@ let colorMode = 0;
 
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
-    let vertices = patch.getTriangleVertices();
+    vertices = patch.getTriangleVertices();
     for (let i = 0; i < vertices.length; i++) {
         let [y, normal] = patch.getPerlinNoise(vertices[i][0], vertices[i][1], perlin_density);
         vertices[i] = vec3(
@@ -47,7 +50,7 @@ function get_patch(xMin, xMax, zMin, zMax) {
         );
         normals.push(normal);
     }
-    return vertices;
+    return [vertices, normals];
 }
 
 window.onload = function init() {
@@ -67,32 +70,10 @@ window.onload = function init() {
     // gl.enable(gl.CULL_FACE);
     gl.useProgram(program);
 
-    // vertices of the corners of the canvas
-    let vertices = get_patch(xMin, xMax, zMin, zMax);
-
-    // Load the data into the GPU and bind to shader variables.
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
-
-    // Associate out shader variables with our data buffer
-    let vPosition = gl.getAttribLocation(program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
-
-    // Load the data into the GPU and bind to shader variables.
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW);
-
-    // Associate out shader variables with our data buffer
-    let normal = gl.getAttribLocation(program, "normalInterp");
-    gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(normal);
     window.onkeydown = function (event) {
         var key = String.fromCharCode(event.keyCode);
-        console.log(key);
         if (event.keyCode == 27) {
             escape = true;
-            console.log("escape");
             return;
         }
         switch (key) {
@@ -126,27 +107,27 @@ window.onload = function init() {
 
                 break;
             case "W":
-                pitch_val += 0.1;
-
+                pitch_val = Math.min(90, pitch_val+5);
+                
                 break;
             case "S":
-                pitch_val -= 0.1;
-
+                pitch_val = Math.max(-90, pitch_val-5);
+                
                 break;
             case "A":
-                yaw_val -= 0.1;
-
+                yaw_val = Math.min(90, yaw_val+5);   
                 break;
+
             case "D":
-                yaw_val += 0.1;
+                yaw_val = Math.max(-90, yaw_val-5);
 
                 break;
             case "Q":
-                roll_val -= 0.1;
+                roll_val = Math.min(90, roll_val+5);;
 
                 break;
             case "E":
-                roll_val += 0.1;
+                roll_val = Math.max(-90, roll_val-5);;
 
                 break;
             case "&":
@@ -179,260 +160,302 @@ window.onload = function init() {
                     program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
                 }
                 colorMode++;
-                console.log("colorMode", colorMode);
                 gl.enable(gl.DEPTH_TEST);
                 // gl.enable(gl.CULL_FACE);
                 gl.useProgram(program);
                 break;
         }
     };
-        // let delayInMilliseconds = (Math.random() * 1000 + 1000) / speed;
-        // time = setInterval(function () {
-        //     forward += 0.1;
-        //     z-=0.01;
 
-        // }, delayInMilliseconds);
+    render();
 
-        render();
-
-        function frustum(left, right, bottom, top, near, far) {
-            if (left == right) {
-                throw "frustum(): left and right are equal";
-            }
-
-            if (bottom == top) {
-                throw "frustum(): bottom and top are equal";
-            }
-
-            if (near == far) {
-                throw "frustum(): near and far are equal";
-            }
-
-            let w = right - left;
-            let h = top - bottom;
-            let d = far - near;
-
-            let result = mat4();
-
-            result[0][0] = (2.0 * near) / w;
-            result[1][1] = (2.0 * near) / h;
-            result[2][2] = -(far + near) / d;
-            result[0][2] = (right + left) / w;
-            result[1][2] = (top + bottom) / h;
-            result[2][3] = (-2 * far * near) / d;
-            result[3][2] = -1;
-            result[3][3] = 0.0;
-
-            return result;
+    function frustum(left, right, bottom, top, near, far) {
+        if (left == right) {
+            throw "frustum(): left and right are equal";
         }
 
-        function render() {
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            z -= 0.01 * speed;
-            let eye = vec3(x, y, z);
-            let at_vec = vec3(0 + yaw_val, -1 + pitch_val + forward, -1);
-            let at = add(eye, at_vec);
-            let look_up = vec3(0 + roll_val, 5, 0);
+        if (bottom == top) {
+            throw "frustum(): bottom and top are equal";
+        }
 
-            let modelView = lookAt(eye, at, look_up);
-            let perspect = frustum(left - 1, right + 1, bottom - 1, top1 + 1, near + 1, far - 1);
-            let normalMat = normalMatrix(modelView, false);
+        if (near == far) {
+            throw "frustum(): near and far are equal";
+        }
 
-            // console.log("eye: ", eye);
-            // console.log("left, right: ", left, right);
-            // console.log("bottom, top: ", bottom, top1);
-            // console.log("near, far: ", near, far);
-            // console.log(modelView);
+        let w = right - left;
+        let h = top - bottom;
+        let d = far - near;
 
-            let modView = gl.getUniformLocation(program, "modelV");
-            let perp = gl.getUniformLocation(program, "perp");
-            let normMat = gl.getUniformLocation(program, "normalMat");
-            gl.uniformMatrix4fv(modView, false, flatten(modelView));
-            gl.uniformMatrix4fv(perp, false, flatten(perspect));
-            gl.uniformMatrix3fv(normMat, false, flatten(normalMat));
+        let result = mat4();
 
-            if (viewMode == 0) {
-                gl.drawArrays(gl.POINTS, 0, vertices.length);
-            }
-            else if (viewMode == 1) {
-                gl.drawArrays(gl.LINES, 0, vertices.length);
-            }
-            else {
-                gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
-            }
-            if (!escape)
-                requestAnimationFrame(render);
-            else{
-                gl.clearColor(0.52, 0.8, 0.92, 1.0);
+        result[0][0] = (2.0 * near) / w;
+        result[1][1] = (2.0 * near) / h;
+        result[2][2] = -(far + near) / d;
+        result[0][2] = (right + left) / w;
+        result[1][2] = (top + bottom) / h;
+        result[2][3] = (-2 * far * near) / d;
+        result[3][2] = -1;
+        result[3][3] = 0.0;
+
+        return result;
+    }
+
+    function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        let yawMat = rotateY(yaw_val);
+        let pitchMat = rotateX(pitch_val);
+        let rollMat = rotateZ(roll_val);
+
+        let at_vec = vec3(0, 0, -1);
+        at_vec = mult(pitchMat, mult(yawMat, vec4(at_vec)));
+        at_vec = vec3(at_vec[0], at_vec[1], at_vec[2]);
+        
+        let move = mult(0.01 * speed, at_vec);
+        eye = add(eye, move);
+
+        let at = add(eye, at_vec);
+        let look_up = vec3(0, 5, 0);
+        look_up = mult(rollMat, vec4(look_up));
+        look_up = vec3(look_up[0], look_up[1], look_up[2]);
+
+        let modelView = lookAt(eye, at, look_up);
+        let perspect = frustum(left - 1, right + 1, bottom - 1, top1 + 1, near + 1, far - 1);
+        let normalMat = normalMatrix(modelView, false);
+
+        if ((!cxMax) || (eye[0] > cxMax || eye[0] < cxMin ||  eye[2] > czMax ||  eye[2] < czMin))
+            setVertices(eye, at_vec);
+
+
+        let modView = gl.getUniformLocation(program, "modelV");
+        let perp = gl.getUniformLocation(program, "perp");
+        let normMat = gl.getUniformLocation(program, "normalMat");
+        gl.uniformMatrix4fv(modView, false, flatten(modelView));
+        gl.uniformMatrix4fv(perp, false, flatten(perspect));
+        gl.uniformMatrix3fv(normMat, false, flatten(normalMat));
+
+        if (viewMode == 0) {
+            gl.drawArrays(gl.POINTS, 0, vertices.length);
+        }
+        else if (viewMode == 1) {
+            gl.drawArrays(gl.LINES, 0, vertices.length);
+        }
+        else {
+            gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
+        }
+        if (!escape)
+            requestAnimationFrame(render);
+        else{
+            gl.clearColor(0.52, 0.8, 0.92, 1.0);
+            
+        }
+    }
+
+    function setVertices(eye, at_vec) {
+
+        let current, forw, for_left, for_right;
+        cxMin = (Math.trunc(eye[0] / 10) - 1) * 10;
+        cxMax = (Math.trunc(eye[0] / 10) + 1) * 10;
+        czMin = (Math.trunc(eye[2] / 10) - 1) * 10;
+        czMax = (Math.trunc(eye[2] / 10) + 1) * 10;
+
+        if ([(Math.trunc(eye[0] / 10) - 1) * 10,
+        (Math.trunc(eye[0] / 10) + 1) * 10,
+        (Math.trunc(eye[2] / 10) - 1) * 10,
+        (Math.trunc(eye[2] / 10) + 1) * 10] in patches) {
+
+            // console.log("Found");
+            current = patches[[(Math.trunc(eye[0] / 10) - 1) * 10,
+            (Math.trunc(eye[0] / 10) + 1) * 10,
+            (Math.trunc(eye[2] / 10) - 1) * 10,
+            (Math.trunc(eye[2] / 10) + 1) * 10]];
+        }
+        else {
+            current = get_patch((Math.trunc(eye[0] / 10) - 1) * 10,
+                (Math.trunc(eye[0] / 10) + 1) * 10,
+                (Math.trunc(eye[2] / 10) - 1) * 10,
+                (Math.trunc(eye[2] / 10) + 1) * 10);
+
+            patches[[(Math.trunc(eye[0] / 10) - 1) * 10,
+            (Math.trunc(eye[0] / 10) + 1) * 10,
+            (Math.trunc(eye[2] / 10) - 1) * 10,
+            (Math.trunc(eye[2] / 10) + 1) * 10]] = current;
+        }
+
+        if (Math.abs(Math.atan(at_vec[2] / at_vec[0])) > Math.PI / 3) {
+            if ([(Math.trunc(eye[0] / 10) - 1) * 10,
+            (Math.trunc(eye[0] / 10) + 1) * 10,
+            (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+            (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20] in patches) {
                 
-            }
-        }
-
-        function setVertices(eye, at_vec) {
-            let current, forward, for_left, for_right;
-            if ([(Math.floor(eye[0] / 10) + 1) * -10,
-            (Math.floor(eye[0] / 10) + 1) * 10,
-            (Math.floor(eye[2] / 10) + 1) * -10,
-            (Math.floor(eye[2] / 10) + 1) * 10] in patches) {
-
-                current = patches[[(Math.floor(eye[0] / 10) + 1) * -10,
-                (Math.floor(eye[0] / 10) + 1) * 10,
-                (Math.floor(eye[2] / 10) + 1) * -10,
-                (Math.floor(eye[2] / 10) + 1) * 10]];
+                // console.log("Found");
+                forw = patches[[(Math.trunc(eye[0] / 10) - 1) * 10,
+                (Math.trunc(eye[0] / 10) + 1) * 10,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]];
             }
             else {
-                current = get_patch((Math.floor(eye[0] / 10) + 1) * -10,
-                    (Math.floor(eye[0] / 10) + 1) * 10,
-                    (Math.floor(eye[2] / 10) + 1) * -10,
-                    (Math.floor(eye[2] / 10) + 1) * 10);
+                forw = get_patch((Math.trunc(eye[0] / 10) - 1) * 10,
+                    (Math.trunc(eye[0] / 10) + 1) * 10,
+                    (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                    (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20);
 
-                patches[[(Math.floor(eye[0] / 10) + 1) * -10,
-                (Math.floor(eye[0] / 10) + 1) * 10,
-                (Math.floor(eye[2] / 10) + 1) * -10,
-                (Math.floor(eye[2] / 10) + 1) * 10]] = current;
+                patches[[(Math.trunc(eye[0] / 10) - 1) * 10,
+                (Math.trunc(eye[0] / 10) + 1) * 10,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]] = forw;
             }
 
-            if (Math.abs(Math.atan(at_vec[2] / at_vec[0])) > Math.pi / 3) {
-                if ([(Math.floor(eye[0] / 10) + 1) * -10,
-                (Math.floor(eye[0] / 10) + 1) * 10,
-                (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20] in patches) {
+            if ([(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+            (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
+            (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+            (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20] in patches) {
 
-                    forward = patches[[(Math.floor(eye[0] / 10) + 1) * -10,
-                    (Math.floor(eye[0] / 10) + 1) * 10,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]];
-                }
-                else {
-                    forward = get_patch((Math.floor(eye[0] / 10) + 1) * -10,
-                        (Math.floor(eye[0] / 10) + 1) * 10,
-                        (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                        (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20);
+                // console.log("Found");
+                for_left = patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]];
+            }
+            else {
+                for_left = get_patch((Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                    (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
+                    (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                    (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20);
 
-                    patches[[(Math.floor(eye[0] / 10) + 1) * -10,
-                    (Math.floor(eye[0] / 10) + 1) * 10,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]] = forward;
-                }
-
-                if ([(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
-                (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20] in patches) {
-
-                    for_left = patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]];
-                }
-                else {
-                    for_left = get_patch((Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                        (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
-                        (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                        (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20);
-
-                    patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]] = for_left;
-                }
-
-                if ([(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
-                (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20] in patches) {
-
-                    for_left = patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]];
-                }
-                else {
-                    for_left = get_patch((Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                        (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
-                        (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                        (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20);
-
-                    patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]] = for_left;
-                }
-
-
+                patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]] = for_left;
             }
 
-            else if (Math.abs(Math.atan(at_vec[2] / at_vec[0])) < Math.pi / 6) {
+            if ([(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+            (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
+            (Math.trunc(eye[2] / 10) - 1) * -10 + Math.sign(at_vec[2]) * 20,
+            (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20] in patches) {
 
-                if ([(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                (Math.floor(eye[2] / 10) + 1) * -10,
-                (Math.floor(eye[2] / 10) + 1) * 10] in patches) {
-
-                    forward = patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10,
-                    (Math.floor(eye[2] / 10) + 1) * 10]];
-                }
-                else {
-                    forward = get_patch((Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                        (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                        (Math.floor(eye[2] / 10) + 1) * -10,
-                        (Math.floor(eye[2] / 10) + 1) * 10);
-
-                    patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10,
-                    (Math.floor(eye[2] / 10) + 1) * 10]] = forward;
-                }
-
-                if ([(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20] in patches) {
-
-                    for_left = patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]];
-                }
-                else {
-                    for_left = get_patch((Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                        (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                        (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                        (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20);
-
-                    patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]] = for_left;
-
-                }
-
-                if ([(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20] in patches) {
-
-                    for_right = patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]];
-                }
-                else {
-                    for_right = get_patch((Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                        (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                        (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                        (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20);
-
-                    patches[[(Math.floor(eye[0] / 10) + 1) * -10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
-                    (Math.floor(eye[2] / 10) + 1) * -10 + Math.sign(at_vec[2]) * -20,
-                    (Math.floor(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]] = for_right;
-                }
+                // console.log("Found");
+                for_right = patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]];
             }
+            else {
+                for_right = get_patch((Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+                    (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
+                    (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                    (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20);
+
+                patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]] = for_right;
+            }
+
 
         }
+
+        else if (Math.abs(Math.atan(at_vec[2] / at_vec[0])) < Math.PI / 6) {
+
+            if ([(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+            (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+            (Math.trunc(eye[2] / 10) - 1) * 10,
+            (Math.trunc(eye[2] / 10) + 1) * 10] in patches) {
+
+                forw = patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10,
+                (Math.trunc(eye[2] / 10) + 1) * 10]];
+            }
+            else {
+                forw = get_patch((Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                    (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                    (Math.trunc(eye[2] / 10) - 1) * 10,
+                    (Math.trunc(eye[2] / 10) + 1) * 10);
+
+                patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10,
+                (Math.trunc(eye[2] / 10) + 1) * 10]] = forw;
+            }
+
+            if ([(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+            (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+            (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+            (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20] in patches) {
+
+                for_left = patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]];
+            }
+            else {
+                for_left = get_patch((Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                    (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                    (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                    (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20);
+
+                patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * 20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * 20]] = for_left;
+
+            }
+
+            if ([(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+            (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+            (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+            (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20] in patches) {
+
+                for_right = patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]];
+            }
+            else {
+                for_right = get_patch((Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                    (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                    (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+                    (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20);
+
+                patches[[(Math.trunc(eye[0] / 10) - 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[0] / 10) + 1) * 10 + Math.sign(at_vec[0]) * 20,
+                (Math.trunc(eye[2] / 10) - 1) * 10 + Math.sign(at_vec[2]) * -20,
+                (Math.trunc(eye[2] / 10) + 1) * 10 + Math.sign(at_vec[2]) * -20]] = for_right;
+            }
+        }
+        vertices = [];
+        normals = [];
+        vertices = vertices.concat(current[0]);
+        normals = normals.concat(current[1]);
+
+        vertices = vertices.concat(forw[0]);
+        normals = normals.concat(forw[1]);
+
+        vertices = vertices.concat(for_left[0]);
+        normals = normals.concat(for_left[1]);
+
+        vertices = vertices.concat(for_right[0]);
+        normals = normals.concat(for_right[1]);
+        
+        // Load the data into the GPU and bind to shader variables.
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+        // Associate out shader variables with our data buffer
+        let vPosition = gl.getAttribLocation(program, "vPosition");
+        gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vPosition);
+
+        // Load the data into the GPU and bind to shader variables.
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW);
+
+        // Associate out shader variables with our data buffer
+        let normal = gl.getAttribLocation(program, "normalInterp");
+        gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(normal);
+    }
 
 };
 
