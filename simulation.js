@@ -92,78 +92,78 @@ window.onload = function init() {
         if (event.keyCode==27)
         {
             escape=true;
+            console.log("escape");
         }
         switch (key) {
             case "1":
                 if (event.shiftKey) left = (left + 0.1 < 1) ? left + 0.1 : left;
                 else left = (left - 0.1 > -1) ? left - 0.1 : left;
-                render(vertices.length);
                 break;
             case "2":
                 if (event.shiftKey) right = (right + 0.1 < 1) ? right + 0.1 : right;
                 else right = (right - 0.1 > -1) ? right - 0.1 : right;
-                render(vertices.length);
+                
                 break;
             case "3":
                 if (event.shiftKey) top1 = (top1 + 0.1 < 1) ? top1 + 0.1 : top1;
                 else top1 = (top1 - 0.1 > -1) ? top1 - 0.1 : top1;
-                render(vertices.length);
+                
                 break;
             case "4":
                 if (event.shiftKey) bottom = (bottom + 0.1 < 1) ? bottom + 0.1 : bottom;
                 else bottom = (bottom - 0.1 > -1) ? bottom - 0.1 : bottom;
-                render(vertices.length);
+                
                 break;
             case "5":
                 if (event.shiftKey) near = (near + 0.1 < 1) ? near + 0.1 : near;
                 else near = (near - 0.1 > -1) ? near - 0.1 : near;
-                render(vertices.length);
+               
                 break;
             case "6":
                 if (event.shiftKey) far = (far + 0.1 < 1) ? far + 0.1 : far;
                 else far = (far - 0.1 > -1) ? far - 0.1 : far;
-                render(vertices.length);
+                
                 break;
             case "W":
                 pitch_val += 0.1;
-                render(vertices.length);
+                
                 break;
             case "S":
                 pitch_val -= 0.1;
-                render(vertices.length);
+                
                 break;
             case "A":
                 yaw_val -= 0.1;
-                render(vertices.length);
+                
                 break;
             case "D":
                 yaw_val += 0.1;
-                render(vertices.length);
+                
                 break;
             case "Q":
                 roll_val -= 0.1;
-                render(vertices.length);
+                
                 break;
             case "E":
                 roll_val += 0.1;
-                render(vertices.length);
+                
                 break;
             case "up":
                 if (speed <= 5) {
                     speed += 1;
                 }
-                render(vertices.length);
+                
                 break;
             case "down":
                 if (speed >= 0) {
                     speed -= 1;
                 }
-                render(vertices.length);
+                
                 break;
             case 'V':
                 if (viewMode == 2) viewMode = 0;
                 else viewMode++;
-                render(vertices.length);
+                
                 break;
             case 'C':
                 if (colorMode == 3) colorMode = 0;
@@ -182,7 +182,6 @@ window.onload = function init() {
                 gl.enable(gl.DEPTH_TEST);
                 // gl.enable(gl.CULL_FACE);
                 gl.useProgram(program);
-                render(vertices.length);
                 break;
         }
     };
