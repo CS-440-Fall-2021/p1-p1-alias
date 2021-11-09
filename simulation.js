@@ -52,6 +52,7 @@ let speedHTML;
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
     vertices = patch.getTriangleVertices();
+    let normalss = [];
     for (let i = 0; i < vertices.length; i++) {
         let [y, normal] = patch.getPerlinNoise(vertices[i][0], vertices[i][1], perlin_density);
         vertices[i] = vec3(
@@ -59,9 +60,9 @@ function get_patch(xMin, xMax, zMin, zMax) {
             y,
             vertices[i][1]
         );
-        normals.push(normal);
+        normalss.push(normal);
     }
-    return [vertices, normals];
+    return [vertices, normalss];
 }
 
 window.onload = function init() {
@@ -91,7 +92,8 @@ window.onload = function init() {
             escape = true; //quit the simulator
             return;
         }
-        switch (key) { //mapping of keys according to manual and as per instructions in the page
+        switch (key) { 
+            //mapping of keys according to manual and as per instructions in the page
             case "1":
                 if (event.shiftKey) left = (left + 0.1 < 1) ? left + 0.1 : left; //if shift is pressed with one within the limit then increment left by 1
                 else left = (left - 0.1 > -1) ? left - 0.1 : left; //if only one is pressed and is within the limit it is decremented 
@@ -158,12 +160,12 @@ window.onload = function init() {
                 }
 
                 break;
-            case 'V':
+            case 'V': // Toggles the drawing mode of points, lines, or fully shaded polygons
                 if (viewMode == 2) viewMode = 0;
                 else viewMode++;
 
                 break;
-            case 'C':
+            case 'C': // Toggles the different shading modes
                 if (colorMode == 3) colorMode = 0;
                 if (colorMode == 0) {
                     program = initShaders(gl, "vertex-shader-gouraud", "fragment-shader"); // gourad shading
@@ -257,7 +259,6 @@ window.onload = function init() {
         let normalMat = normalMatrix(modelView, false);
 
         if ((eye[0] > cxMax) || (eye[0] < cxMin) || (eye[2] > czMax) || (eye[2] < czMin)){
-  
             setVertices(eye);
         }
 
@@ -325,13 +326,12 @@ window.onload = function init() {
 
     function setVertices(eye) {
         let current, forw, for_left, for_right, left, right;
-        let n = Math.trunc(eye[0] / 20)
+        let n = Math.floor(eye[0] / 20)
         cxMin = n * 20 ;
         cxMax = (n+1) * 20 ;
         n = Math.trunc(eye[2] / 20)
         czMin = (n-1) * 20 ;
         czMax = n * 20 ;
-        console.log(cxMin,cxMax,czMin,czMax)
 
         if ([cxMin, cxMax, czMin, czMax] in patches) {
 
@@ -396,21 +396,22 @@ window.onload = function init() {
 
         vertices = [];
         normals = [];
+
         vertices = vertices.concat(current[0]);
         normals = normals.concat(current[1]);
-
+        
         vertices = vertices.concat(forw[0]);
         normals = normals.concat(forw[1]);
-
+        
         vertices = vertices.concat(for_left[0]);
         normals = normals.concat(for_left[1]);
-
+        
         vertices = vertices.concat(for_right[0]);
         normals = normals.concat(for_right[1]);
-
+        
         vertices = vertices.concat(left[0]);
         normals = normals.concat(left[1]);
-
+        
         vertices = vertices.concat(right[0]);
         normals = normals.concat(right[1]);
         
