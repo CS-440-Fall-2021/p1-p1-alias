@@ -40,6 +40,7 @@ let colorMode = 0;
 
 let viewModeHTML;
 let colorModeHTML;
+let speedHTML;
 
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
@@ -61,6 +62,7 @@ window.onload = function init() {
     let canvas = document.getElementById("gl-canvas");
     viewModeHTML = document.getElementById("view-mode");
     colorModeHTML = document.getElementById("shade-mode");
+    speedHTML = document.getElementById("speed-mode");
 
     gl = canvas.getContext("webgl2");
     if (!gl) alert("WebGL 2.0 isn't available");
@@ -210,6 +212,7 @@ window.onload = function init() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         viewModeHTML.innerHTML = viewingMode(viewMode);
         colorModeHTML.innerHTML = coloringMode(colorMode);
+        speedHTML.innerHTML=speed;
         
         let yawMat = rotateY(yaw_val);
         let pitchMat = rotateX(pitch_val);
@@ -273,7 +276,17 @@ window.onload = function init() {
 
     function coloringMode(colorMode){
         if (colorMode == 0 || colorMode == 1){
-            return "Smooth";
+            function coloringMode(colorMode){
+                if (colorMode == 0 || colorMode == 1){
+                    return "Smooth";
+                }
+                else if (colorMode == 2){
+                    return "Flat";
+                }
+                else if (colorMode == 3){
+                    return "Phong";
+                }
+            }            return "Smooth";
         }
         else if (colorMode == 2){
             return "Flat";
@@ -282,6 +295,8 @@ window.onload = function init() {
             return "Phong";
         }
     }
+
+    
 
     function setVertices(eye, at_vec) {
 
