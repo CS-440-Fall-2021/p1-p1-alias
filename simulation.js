@@ -31,11 +31,8 @@ let cxMin, cxMax, czMin, czMax;
 let patches = new Object();
 
 let eye = vec3(x, y, z);
+let modelView;
 
-
-
-let mvMatrix, pMatrix;
-let modelView, projection;
 let vertices = [];
 let normals = [];
 
@@ -82,74 +79,74 @@ window.onload = function init() {
     // gl.enable(gl.CULL_FACE);
     gl.useProgram(program);
 
-    window.onkeydown = function (event) {
+    window.onkeydown = function (event) {//when a key is pressed
         var key = String.fromCharCode(event.keyCode);
-        if (event.keyCode == 27) {
-            escape = true;
+        if (event.keyCode == 27) {//if it is the Esc key
+            escape = true; //quit the simulator
             return;
         }
-        switch (key) {
+        switch (key) { //mapping of keys according to manual and as per instructions in the page
             case "1":
-                if (event.shiftKey) left = (left + 0.1 < 1) ? left + 0.1 : left;
-                else left = (left - 0.1 > -1) ? left - 0.1 : left;
+                if (event.shiftKey) left = (left + 0.1 < 1) ? left + 0.1 : left; //if shift is pressed with one within the limit then increment left by 1
+                else left = (left - 0.1 > -1) ? left - 0.1 : left; //if only one is pressed and is within the limit it is decremented 
                 break;
             case "2":
-                if (event.shiftKey) right = (right + 0.1 < 1) ? right + 0.1 : right;
-                else right = (right - 0.1 > -1) ? right - 0.1 : right;
+                if (event.shiftKey) right = (right + 0.1 < 1) ? right + 0.1 : right;  //if shift is pressed with then within the limit then increment right by 1
+                else right = (right - 0.1 > -1) ? right - 0.1 : right; //if only two is pressed and is within the limit it is decremented
 
                 break;
             case "3":
-                if (event.shiftKey) top1 = (top1 + 0.1 < 1) ? top1 + 0.1 : top1;
-                else top1 = (top1 - 0.1 > -1) ? top1 - 0.1 : top1;
+                if (event.shiftKey) top1 = (top1 + 0.1 < 1) ? top1 + 0.1 : top1;//if shift is pressed with three within the limit then increment top by 1
+                else top1 = (top1 - 0.1 > -1) ? top1 - 0.1 : top1;//if only three is pressed and is within the limit it is decremented
 
                 break;
             case "4":
-                if (event.shiftKey) bottom = (bottom + 0.1 < 1) ? bottom + 0.1 : bottom;
-                else bottom = (bottom - 0.1 > -1) ? bottom - 0.1 : bottom;
+                if (event.shiftKey) bottom = (bottom + 0.1 < 1) ? bottom + 0.1 : bottom; //if shift is pressed with four within the limit then increment bottom by 1
+                else bottom = (bottom - 0.1 > -1) ? bottom - 0.1 : bottom;//if only four is pressed and is within the limit it is decremented
 
                 break;
             case "5":
-                if (event.shiftKey) near = (near + 0.1 < 1) ? near + 0.1 : near;
-                else near = (near - 0.1 > -1) ? near - 0.1 : near;
+                if (event.shiftKey) near = (near + 0.1 < 1) ? near + 0.1 : near; //if shift is pressed with five within the limit then increment near by 1
+                else near = (near - 0.1 > -1) ? near - 0.1 : near;//if only five is pressed and is within the limit it is decremented 
 
                 break;
             case "6":
-                if (event.shiftKey) far = (far + 0.1 < 1) ? far + 0.1 : far;
-                else far = (far - 0.1 > -1) ? far - 0.1 : far;
+                if (event.shiftKey) far = (far + 0.1 < 1) ? far + 0.1 : far; //if shift is pressed with six within the limit then increment far by 1
+                else far = (far - 0.1 > -1) ? far - 0.1 : far; //if only six is pressed and is within the limit it is decremented
 
                 break;
             case "W":
-                pitch_val = Math.min(90, pitch_val + 5);
+                pitch_val = Math.min(90, pitch_val + 5); //increment pitch val by 5 such that it is within the rotation limit of 90
 
                 break;
             case "S":
-                pitch_val = Math.max(-90, pitch_val - 5);
+                pitch_val = Math.max(-90, pitch_val - 5); //decrement pitch val by 5 such that it is within the rotation limit of 90 in the opposite direction
 
                 break;
             case "A":
-                yaw_val = Math.min(90, yaw_val + 5);
+                yaw_val = Math.min(90, yaw_val + 5); //increment yaw val by 5 such that it is within the rotation limit of 90
                 break;
 
             case "D":
-                yaw_val = Math.max(-90, yaw_val - 5);
+                yaw_val = Math.max(-90, yaw_val - 5);//decrement yaw val by 5 such that it is within the rotation limit of 90 in the opposite direction
 
                 break;
             case "Q":
-                roll_val = Math.min(90, roll_val + 5);;
+                roll_val = Math.min(90, roll_val + 5);  //increment roll val by 5 such that it is within the rotation limit of 90
 
                 break;
             case "E":
-                roll_val = Math.max(-90, roll_val - 5);;
+                roll_val = Math.max(-90, roll_val - 5); //decrement roll val by 5 such that it is within the rotation limit of 90 in the opposite direction
 
                 break;
             case "&":
-                if (speed <= 5) {
+                if (speed <= 5) { //increase speed by 1 such that it does not exceed the speed limit 6
                     speed += 1;
                 }
 
                 break;
             case "(":
-                if (speed > 0) {
+                if (speed > 0) {//decrease speed by 1 such that it does not fall below 0.
                     speed -= 1;
                 }
 
@@ -173,7 +170,6 @@ window.onload = function init() {
                 }
                 colorMode++;
                 gl.enable(gl.DEPTH_TEST);
-                // gl.enable(gl.CULL_FACE);
                 gl.useProgram(program);
                 break;
         }
@@ -217,14 +213,17 @@ window.onload = function init() {
         colorModeHTML.innerHTML = coloringMode(colorMode);
         speedHTML.innerHTML = speed;
 
-        let yawMat = rotateY(yaw_val);
+        //making matrices wrt to the value of rotations defined
+        let yawMat = rotateY(yaw_val); 
         let pitchMat = rotateX(pitch_val);
         let rollMat = rotateZ(roll_val);
-
+        
+        //assigning vector to at_vec
         let at_vec = vec3(0, 0, -1);
         at_vec = mult(pitchMat, mult(yawMat, vec4(at_vec)));
         at_vec = vec3(at_vec[0], at_vec[1], at_vec[2]);
 
+        
         let move = mult(0.01 * speed, at_vec);
         eye = add(eye, move);
 
