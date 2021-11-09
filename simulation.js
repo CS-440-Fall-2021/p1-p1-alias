@@ -260,7 +260,12 @@ window.onload = function init() {
             else {
                 gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
             }
-            requestAnimationFrame(render);
+            if (!escape)
+                requestAnimationFrame(render);
+            else{
+                gl.clearColor(0.52, 0.8, 0.92, 1.0);
+                
+            }
         }
 
         function setVertices(eye, at_vec) {
