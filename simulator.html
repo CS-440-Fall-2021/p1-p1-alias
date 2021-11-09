@@ -1,15 +1,14 @@
 <!-- taken from book -->
 <!DOCTYPE html>
 <html>
-  <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>Flight Simulator</title>
-        <link
-      href="http://fonts.cdnfonts.com/css/rabbid-highway-sign-ii?styles=29640"
-      rel="stylesheet"/>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Flight Simulator</title>
+    <link href="http://fonts.cdnfonts.com/css/rabbid-highway-sign-ii?styles=29640" rel="stylesheet" />
 
 
-        <script id="vertex-shader-flat" type="x-shader/x-vertex">
+    <script id="vertex-shader-flat" type="x-shader/x-vertex">
             #version 300 es
             in vec4 vPosition;
             uniform mat4 perp;
@@ -88,8 +87,8 @@
 
         </script>
 
-      
-        <script id="vertex-shader-gouraud" type="x-shader/x-vertex">
+
+    <script id="vertex-shader-gouraud" type="x-shader/x-vertex">
             #version 300 es
             in vec4 vPosition;
             uniform mat4 perp;
@@ -168,7 +167,7 @@
 
         </script>
 
-        <script id="vertex-shader-phong" type="x-shader/x-vertex">
+    <script id="vertex-shader-phong" type="x-shader/x-vertex">
             #version 300 es
             precision highp float;
 
@@ -190,8 +189,8 @@
                 gl_Position = perp * verPoint4;
             }
         </script>
-    
-        <script id="fragment-shader" type="x-shader/x-fragment">
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
             
@@ -204,7 +203,7 @@
             }
         </script>
 
-        <script id="fragment-shader-flat" type="x-shader/x-fragment">
+    <script id="fragment-shader-flat" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
             
@@ -217,7 +216,7 @@
             }
         </script>
 
-        <script id="fragment-shader-phong" type="x-shader/x-fragment">
+    <script id="fragment-shader-phong" type="x-shader/x-fragment">
             #version 300 es
             precision mediump float;
 
@@ -306,106 +305,94 @@
             }
 
         </script>
-        
-        <script type="text/javascript" src="initShadersES6.js"></script>
-        <script type="text/javascript" src="MVES6.js"></script>
-        <script type="text/javascript" src="perlin_noise.js"></script>
-        <script type="text/javascript" src="simulation.js"></script>
 
-    </head>
+    <script type="text/javascript" src="initShadersES6.js"></script>
+    <script type="text/javascript" src="MVES6.js"></script>
+    <script type="text/javascript" src="perlin_noise.js"></script>
+    <script type="text/javascript" src="simulation.js"></script>
 
-    <body
-    style="
+</head>
+
+<body style="
       background-color: #242424;
       color: rgb(255, 255, 255);
       font-family: 'Rabbid Highway Sign II', sans-serif;
       margin: 0; 
       overflow: hidden
-    "
-  >
-    <table style="text-align: center;margin-left: auto; margin-right: auto; margin-top: 0%; margin-bottom: 0%; width:80%; height: 80%">
+    ">
+    <table
+        style="text-align: center;margin-left: auto; margin-right: auto; margin-top: 0%; margin-bottom: 0%; width:80%; height: 80%">
         <tr>
             <td style="width:70%">
-                    <canvas
-                      id="gl-canvas"
-                      width="700"
-                      height="700"
-                      style="border: 1px solid rgb(255, 255, 255);"
-                    >
-                      Oops ... your browser doesn't support the HTML5 canvas element
-                    </canvas>
+                <canvas id="gl-canvas" width="700" height="700" style="border: 1px solid rgb(255, 255, 255);">
+                    Oops ... your browser doesn't support the HTML5 canvas element
+                </canvas>
             </td>
             <td style="width:30%">
-                    <table style="text-align: left;margin-left: 10%; margin-right: 10%; margin-top: 5%; margin-bottom: 5%;">
-                        <tr height="10%">
-                            <td colspan="2">
-                                <h1 style="text-align: center;" >Flight Simulator</h1>
-                            </td>
-                            
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <p
-                                    id="viewModeTag"
-                                    style="font-size: 24px; font-weight: bolder; color: red">
-                                        Viewing Mode: &nbsp;&nbsp;
-                                    </p>
-                                    <p id="view-mode" style="font-size: 24px; font-weight: bolder">
-                                        0
-                                    </p>
-                                </div>
-                            </td>
-                        </tr>
+                <table style="text-align: left;margin-left: 10%; margin-right: 10%; margin-top: 5%; margin-bottom: 5%;">
+                    <tr height="10%">
+                        <td colspan="2">
+                            <h1 style="text-align: center;">Flight Simulator</h1>
+                        </td>
 
-                        <tr>
-                            <td colspan="2">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <p
-                                    id="colorModeTag"
-                                    style="font-size: 24px; font-weight: bolder; color: red"
-                                    >
-                                        Shading Mode: &nbsp;&nbsp;
-                                    </p>
-                                    <p id="shade-mode" style="font-size: 24px; font-weight: bolder">
-                                        0
-                                    </p>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <p
-                                    id="speedTag"
-                                    style="font-size: 24px; font-weight: bolder; color: red">
-                                        Speed: &nbsp;&nbsp;
-                                    </p>
-                                    <p id="speed-mode" style="font-size: 24px; font-weight: bolder">
-                                        0
-                                    </p>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div style="font-size: 20px; line-height: 200%; width:100%;" >
-                                    <i>Instructions:</i> 
-                                    
-                                    <br>1. Press "V" to toggle view mode.
-                                    <br>2. Press "C" to toggle shade mode.
-                                    <br>3. Press up/down arrow keys to toggle speed.
-                                    <br>3. Press "W" and "S" for pitch.
-                                    <br>4. Press "A" and "D" for yaw.
-                                    <br>5. Press "Q" and "E" for roll.
-                                </div>
-                            </td>
-                        </tr>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div style="display: flex; justify-content: space-between;">
+                                <p id="viewModeTag" style="font-size: 24px; font-weight: bolder; color: red">
+                                    Viewing Mode: &nbsp;&nbsp;
+                                </p>
+                                <p id="view-mode" style="font-size: 24px; font-weight: bolder">
+                                    0
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            <div style="display: flex; justify-content: space-between;">
+                                <p id="colorModeTag" style="font-size: 24px; font-weight: bolder; color: red">
+                                    Shading Mode: &nbsp;&nbsp;
+                                </p>
+                                <p id="shade-mode" style="font-size: 24px; font-weight: bolder">
+                                    0
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div style="display: flex; justify-content: space-between;">
+                                <p id="speedTag" style="font-size: 24px; font-weight: bolder; color: red">
+                                    Speed: &nbsp;&nbsp;
+                                </p>
+                                <p id="speed-mode" style="font-size: 24px; font-weight: bolder">
+                                    0
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div style="font-size: 16px; line-height: 200%; width:100%;">
+                                <i>Instructions:</i>
+
+                                <br>1. Press "V" to toggle view mode.
+                                <br>2. Press "C" to toggle shade mode.
+                                <br>3. Press up/down arrow keys to toggle speed.
+                                <br>4. Press "W" and "S" for pitch.
+                                <br>5. Press "A" and "D" for yaw.
+                                <br>6. Press "Q" and "E" for roll.
+                                <br>7. Press "Esc" key to end simulation.
+                            </div>
+                        </td>
+                    </tr>
 
             </td>
         </tr>
     </table>
-    
-  </body>
+
+</body>
 
 </html>
