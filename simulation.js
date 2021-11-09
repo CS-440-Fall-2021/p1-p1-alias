@@ -5,30 +5,34 @@ let escape = false; //to keep track if esc is pressed
 let gl;
 let resolution = 200;
 let perlin_density = 25;
+
 let x = 0.0;
-let y = 3.0;
+let y = 3.0; //fixing the altitude to 3
 let z = 0.0;
-let pitch_val = 0;
-let yaw_val = 0;
-let roll_val = 0;
-let left = 0;
-let right = 0;
-let top1 = 0;
-let bottom = 0;
-let near = 0;
-let far = 0;
-let fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
-let aspect; // Viewport aspect ratio
+
+
+let left = 0; //alter left bound of view
+let right = 0; //alter right bound of view
+let top1 = 0;//alter top bound of view
+let bottom = 0;//alter bottom bound of view
+let near = 0; //alter near bound of view
+let far = 0; //alter far bound of view
+
+let pitch_val = 0;  //alter the pitch rotation
+let yaw_val = 0; //alter the yaw rotation
+let roll_val = 0; //alter the roll rotation
+let speed = 1;//to modify the speed
+
 let xMin = -10.0;
 let xMax = 10.0;
 let zMin = -10.0;
 let zMax = 10.0;
 let cxMin, cxMax, czMin, czMax;
 let patches = new Object();
-let time = 0;
-let forward = 0;
-let speed = 1;
+
 let eye = vec3(x, y, z);
+
+
 
 let mvMatrix, pMatrix;
 let modelView, projection;
@@ -40,7 +44,7 @@ let colorMode = 0;
 
 let viewModeHTML;
 let colorModeHTML;
-let speedHTML;
+let speedHTML; 
 
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
