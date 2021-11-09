@@ -5,6 +5,11 @@
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>simulator.html</title>
 
+        <link
+      href="http://fonts.cdnfonts.com/css/rabbid-highway-sign-ii?styles=29640"
+      rel="stylesheet"
+    />
+
         <script id="vertex-shader-flat-old" type="x-shader/x-vertex">
             #version 300 es
             in vec4 vPosition;
@@ -349,13 +354,96 @@
 
     </head>
 
-    <body>
+    <!-- <body>
         <h1 style="font-family:verdana;">Flight Simulator</h1>
         <br>
 
         <canvas id="gl-canvas" width="512" height="512" style="border:1px solid #000000;">
             Oops ... your browser doesn't support the HTML5 canvas element
         </canvas>
-    </body>
+
+        <b>Viewing Mode: <span id="view-mode"></span></b>
+        <br>
+        <b>Shading Mode: <span id="shade-mode"></span></b>
+        <br>
+        <b>Press "V" to toggle view mode.</b>
+        <br>
+        <b>Press "C" to toggle shade mode.</b>
+        
+    </body> -->
+
+    <body
+    style="
+      background-color: #242424;
+      color: rgb(255, 255, 255);
+      font-family: 'Rabbid Highway Sign II', sans-serif;
+    "
+  >
+    <table style="text-align: center;margin-left: 0%; margin-right: 0%; margin-top: -20px; margin-bottom: -20px; width:100%;">
+        <tr>
+            <td>
+                <!-- <div style="text-align:center;"> -->
+                    <canvas
+                      id="gl-canvas"
+                      width="1024"
+                      height="1024"
+                      style="border: 1px solid rgb(255, 255, 255);"
+                    >
+                      Oops ... your browser doesn't support the HTML5 canvas element
+                    </canvas>
+                <!-- </div> -->
+            </td>
+            <td>
+                    <table style="text-align: left;margin-left: 10%; margin-right: 5%; margin-top: 5%; margin-bottom: 5%;">
+                        <tr height="10%">
+                            <td colspan="2">
+                                <h1 style="text-align: center;" >Flight Simulator</h1>
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td>
+                                <p
+                                    id="viewModeTag"
+                                    style="font-size: 24px; font-weight: bolder; color: red"
+                                >
+                                Viewing Mode&nbsp;&nbsp;
+                                </p>
+                            </td>
+                            <td>
+                                <p id="view-mode" style="font-size: 24px; font-weight: bolder">0</p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <p
+                                id="colorModeTag"
+                                style="font-size: 24px; font-weight: bolder; color: red"
+                                >
+                                    Shading Mode&nbsp;&nbsp;
+                                </p>
+                            </td>
+                            <td>
+                                <p id="shade-mode" style="font-size: 24px; font-weight: bolder">0</p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2">
+                                <div style="font-size: 20px; line-height: 200%; width:100%;" >
+                                    <i>Instructions:</i> 
+                                    
+                                    <br>1. Press "V" to toggle view mode.
+                                    <br>2. Press "C" to toggle shade mode.
+                                </div>
+                            </td>
+                        </tr>
+
+            </td>
+        </tr>
+    </table>
+    
+  </body>
 
 </html>

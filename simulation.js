@@ -35,6 +35,9 @@ let normals = [];
 let viewMode = 1;
 let colorMode = 0;
 
+let viewModeHTML;
+let colorModeHTML;
+
 function get_patch(xMin, xMax, zMin, zMax) {
     patch = new Patch(xMin, xMax, zMin, zMax, resolution);
     let vertices = patch.getTriangleVertices();
@@ -53,6 +56,9 @@ function get_patch(xMin, xMax, zMin, zMax) {
 window.onload = function init() {
 
     let canvas = document.getElementById("gl-canvas");
+    viewModeHTML = document.getElementById("view-mode");
+    colorModeHTML = document.getElementById("shade-mode");
+
     gl = canvas.getContext("webgl2");
     if (!gl) alert("WebGL 2.0 isn't available");
 
@@ -226,8 +232,35 @@ window.onload = function init() {
             return result;
         }
 
+        function viewingMode(viewMode){
+            if (viewMode == 0) {
+                return "Points";
+            }
+            else if (viewMode == 1) {
+                return "Wireframes";
+            }
+            else {
+                return "Faces";
+            }
+        }
+
+        function coloringMode(colorMode){
+            if (colorMode == 0 || colorMode == 1){
+                return "Smooth";
+            }
+            else if (colorMode == 2){
+                return "Flat";
+            }
+            else if (colorMode == 3){
+                return "Phong";
+            }
+        }
+
         function render() {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            viewModeHTML.innerHTML = viewingMode(viewMode);
+            colorModeHTML.innerHTML = coloringMode(colorMode);
+
             z -= 0.01 * speed;
             let eye = vec3(x, y, z);
             let at_vec = vec3(0 + yaw_val, -1 + pitch_val + forward, -1);
