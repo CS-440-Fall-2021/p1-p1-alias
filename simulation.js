@@ -223,8 +223,10 @@ window.onload = function init() {
         at_vec = mult(pitchMat, mult(yawMat, vec4(at_vec)));
         at_vec = vec3(at_vec[0], at_vec[1], at_vec[2]);
 
-        
+        //multiplying the automatic increment happening and speed with the at_vec
         let move = mult(0.01 * speed, at_vec);
+
+        //and add this change to the eye vector
         eye = add(eye, move);
 
         let at = add(eye, at_vec);
