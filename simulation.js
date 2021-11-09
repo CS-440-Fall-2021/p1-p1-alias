@@ -87,107 +87,105 @@ window.onload = function init() {
     let normal = gl.getAttribLocation(program, "normalInterp");
     gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(normal);
-    while (escape == false) {
-        window.onkeydown = function (event) {
-            var key = String.fromCharCode(event.keyCode);
-            console.log(key);
-            if (event.keyCode == 27) {
-                escape = true;
-                console.log("escape");
-                return;
-            }
-            switch (key) {
-                case "1":
-                    if (event.shiftKey) left = (left + 0.1 < 1) ? left + 0.1 : left;
-                    else left = (left - 0.1 > -1) ? left - 0.1 : left;
-                    break;
-                case "2":
-                    if (event.shiftKey) right = (right + 0.1 < 1) ? right + 0.1 : right;
-                    else right = (right - 0.1 > -1) ? right - 0.1 : right;
+    window.onkeydown = function (event) {
+        var key = String.fromCharCode(event.keyCode);
+        console.log(key);
+        if (event.keyCode == 27) {
+            escape = true;
+            console.log("escape");
+            return;
+        }
+        switch (key) {
+            case "1":
+                if (event.shiftKey) left = (left + 0.1 < 1) ? left + 0.1 : left;
+                else left = (left - 0.1 > -1) ? left - 0.1 : left;
+                break;
+            case "2":
+                if (event.shiftKey) right = (right + 0.1 < 1) ? right + 0.1 : right;
+                else right = (right - 0.1 > -1) ? right - 0.1 : right;
 
-                    break;
-                case "3":
-                    if (event.shiftKey) top1 = (top1 + 0.1 < 1) ? top1 + 0.1 : top1;
-                    else top1 = (top1 - 0.1 > -1) ? top1 - 0.1 : top1;
+                break;
+            case "3":
+                if (event.shiftKey) top1 = (top1 + 0.1 < 1) ? top1 + 0.1 : top1;
+                else top1 = (top1 - 0.1 > -1) ? top1 - 0.1 : top1;
 
-                    break;
-                case "4":
-                    if (event.shiftKey) bottom = (bottom + 0.1 < 1) ? bottom + 0.1 : bottom;
-                    else bottom = (bottom - 0.1 > -1) ? bottom - 0.1 : bottom;
+                break;
+            case "4":
+                if (event.shiftKey) bottom = (bottom + 0.1 < 1) ? bottom + 0.1 : bottom;
+                else bottom = (bottom - 0.1 > -1) ? bottom - 0.1 : bottom;
 
-                    break;
-                case "5":
-                    if (event.shiftKey) near = (near + 0.1 < 1) ? near + 0.1 : near;
-                    else near = (near - 0.1 > -1) ? near - 0.1 : near;
+                break;
+            case "5":
+                if (event.shiftKey) near = (near + 0.1 < 1) ? near + 0.1 : near;
+                else near = (near - 0.1 > -1) ? near - 0.1 : near;
 
-                    break;
-                case "6":
-                    if (event.shiftKey) far = (far + 0.1 < 1) ? far + 0.1 : far;
-                    else far = (far - 0.1 > -1) ? far - 0.1 : far;
+                break;
+            case "6":
+                if (event.shiftKey) far = (far + 0.1 < 1) ? far + 0.1 : far;
+                else far = (far - 0.1 > -1) ? far - 0.1 : far;
 
-                    break;
-                case "W":
-                    pitch_val += 0.1;
+                break;
+            case "W":
+                pitch_val += 0.1;
 
-                    break;
-                case "S":
-                    pitch_val -= 0.1;
+                break;
+            case "S":
+                pitch_val -= 0.1;
 
-                    break;
-                case "A":
-                    yaw_val -= 0.1;
+                break;
+            case "A":
+                yaw_val -= 0.1;
 
-                    break;
-                case "D":
-                    yaw_val += 0.1;
+                break;
+            case "D":
+                yaw_val += 0.1;
 
-                    break;
-                case "Q":
-                    roll_val -= 0.1;
+                break;
+            case "Q":
+                roll_val -= 0.1;
 
-                    break;
-                case "E":
-                    roll_val += 0.1;
+                break;
+            case "E":
+                roll_val += 0.1;
 
-                    break;
-                case "&":
-                    console.log("up");
-                    if (speed <= 5) {
-                        speed += 1;
-                    }
+                break;
+            case "&":
+                if (speed <= 5) {
+                    speed += 1;
+                }
 
-                    break;
-                case "(":
-                    if (speed > 0) {
-                        speed -= 1;
-                    }
+                break;
+            case "(":
+                if (speed > 0) {
+                    speed -= 1;
+                }
 
-                    break;
-                case 'V':
-                    if (viewMode == 2) viewMode = 0;
-                    else viewMode++;
+                break;
+            case 'V':
+                if (viewMode == 2) viewMode = 0;
+                else viewMode++;
 
-                    break;
-                case 'C':
-                    if (colorMode == 3) colorMode = 0;
-                    if (colorMode == 0) {
-                        program = initShaders(gl, "vertex-shader-gouraud", "fragment-shader"); // gourad shading
+                break;
+            case 'C':
+                if (colorMode == 3) colorMode = 0;
+                if (colorMode == 0) {
+                    program = initShaders(gl, "vertex-shader-gouraud", "fragment-shader"); // gourad shading
 
-                    }
-                    else if (colorMode == 1) {
-                        program = initShaders(gl, "vertex-shader-flat", "fragment-shader-flat");
-                    }
-                    else {
-                        program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
-                    }
-                    colorMode++;
-                    console.log("colorMode", colorMode);
-                    gl.enable(gl.DEPTH_TEST);
-                    // gl.enable(gl.CULL_FACE);
-                    gl.useProgram(program);
-                    break;
-            }
-        };
+                }
+                else if (colorMode == 1) {
+                    program = initShaders(gl, "vertex-shader-flat", "fragment-shader-flat");
+                }
+                else {
+                    program = initShaders(gl, "vertex-shader-phong", "fragment-shader-phong");
+                }
+                colorMode++;
+                console.log("colorMode", colorMode);
+                gl.enable(gl.DEPTH_TEST);
+                // gl.enable(gl.CULL_FACE);
+                gl.useProgram(program);
+                break;
+        }
+    };
         // let delayInMilliseconds = (Math.random() * 1000 + 1000) / speed;
         // time = setInterval(function () {
         //     forward += 0.1;
@@ -430,7 +428,6 @@ window.onload = function init() {
             }
 
         }
-    }
 
 };
 
