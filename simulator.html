@@ -3,51 +3,11 @@
 <html>
   <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>simulator.html</title>
-
+        <title>Flight Simulator</title>
         <link
       href="http://fonts.cdnfonts.com/css/rabbid-highway-sign-ii?styles=29640"
-      rel="stylesheet"
-    />
+      rel="stylesheet"/>
 
-        <script id="vertex-shader-flat-old" type="x-shader/x-vertex">
-            #version 300 es
-            in vec4 vPosition;
-            uniform mat4 perp;
-            uniform mat4 modelV;
-            flat out vec4 color;
-            
-            // Color values
-            #define grass_color vec4(0.168, 0.709, 0.302,1)
-            #define mountain_color vec4(0.59, 0.48, 0.33,1)
-            #define snow_color vec4(1.0, 1.0, 1.0,1)
-            #define sea_color vec4(0.0,0.412,0.58,1)
-
-            void
-            main()
-            {
-                gl_Position = perp * modelV * vec4(vPosition.x,vPosition.y,vPosition.z,1);
-                gl_PointSize= 1.0;
-
-                // Assign Color based on y-position
-                if (vPosition[1] <= 0.0){
-                    color = sea_color;
-                }
-                else
-                {
-                    if (vPosition[1] > 0.7){
-                        color = snow_color;
-                    }
-                    else if (vPosition[1] < 0.3){
-                        color = grass_color;
-                    }
-                    else {
-                        color = mountain_color;
-                    }
-                }
-            }
-
-        </script>
 
         <script id="vertex-shader-flat" type="x-shader/x-vertex">
             #version 300 es
@@ -354,47 +314,29 @@
 
     </head>
 
-    <!-- <body>
-        <h1 style="font-family:verdana;">Flight Simulator</h1>
-        <br>
-
-        <canvas id="gl-canvas" width="512" height="512" style="border:1px solid #000000;">
-            Oops ... your browser doesn't support the HTML5 canvas element
-        </canvas>
-
-        <b>Viewing Mode: <span id="view-mode"></span></b>
-        <br>
-        <b>Shading Mode: <span id="shade-mode"></span></b>
-        <br>
-        <b>Press "V" to toggle view mode.</b>
-        <br>
-        <b>Press "C" to toggle shade mode.</b>
-        
-    </body> -->
-
     <body
     style="
       background-color: #242424;
       color: rgb(255, 255, 255);
       font-family: 'Rabbid Highway Sign II', sans-serif;
+      margin: 0; 
+      overflow: hidden
     "
   >
-    <table style="text-align: center;margin-left: 0%; margin-right: 0%; margin-top: -20px; margin-bottom: -20px; width:100%;">
+    <table style="text-align: center;margin-left: auto; margin-right: auto; margin-top: 0%; margin-bottom: 0%; width:80%; height: 80%">
         <tr>
-            <td>
-                <!-- <div style="text-align:center;"> -->
+            <td style="width:70%">
                     <canvas
                       id="gl-canvas"
-                      width="1024"
-                      height="1024"
+                      width="700"
+                      height="700"
                       style="border: 1px solid rgb(255, 255, 255);"
                     >
                       Oops ... your browser doesn't support the HTML5 canvas element
                     </canvas>
-                <!-- </div> -->
             </td>
-            <td>
-                    <table style="text-align: left;margin-left: 10%; margin-right: 5%; margin-top: 5%; margin-bottom: 5%;">
+            <td style="width:30%">
+                    <table style="text-align: left;margin-left: 10%; margin-right: 10%; margin-top: 5%; margin-bottom: 5%;">
                         <tr height="10%">
                             <td colspan="2">
                                 <h1 style="text-align: center;" >Flight Simulator</h1>
@@ -402,30 +344,33 @@
                             
                         </tr>
                         <tr>
-                            <td>
-                                <p
+                            <td colspan="2">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <p
                                     id="viewModeTag"
-                                    style="font-size: 24px; font-weight: bolder; color: red"
-                                >
-                                Viewing Mode&nbsp;&nbsp;
-                                </p>
-                            </td>
-                            <td>
-                                <p id="view-mode" style="font-size: 24px; font-weight: bolder">0</p>
+                                    style="font-size: 24px; font-weight: bolder; color: red">
+                                        Viewing Mode: &nbsp;&nbsp;
+                                    </p>
+                                    <p id="view-mode" style="font-size: 24px; font-weight: bolder">
+                                        0
+                                    </p>
+                                </div>
                             </td>
                         </tr>
 
                         <tr>
-                            <td>
-                                <p
-                                id="colorModeTag"
-                                style="font-size: 24px; font-weight: bolder; color: red"
-                                >
-                                    Shading Mode&nbsp;&nbsp;
-                                </p>
-                            </td>
-                            <td>
-                                <p id="shade-mode" style="font-size: 24px; font-weight: bolder">0</p>
+                            <td colspan="2">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <p
+                                    id="colorModeTag"
+                                    style="font-size: 24px; font-weight: bolder; color: red"
+                                    >
+                                        Shading Mode: &nbsp;&nbsp;
+                                    </p>
+                                    <p id="shade-mode" style="font-size: 24px; font-weight: bolder">
+                                        0
+                                    </p>
+                                </div>
                             </td>
                         </tr>
 
